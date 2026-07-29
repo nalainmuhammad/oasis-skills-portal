@@ -73,7 +73,14 @@ class ActivityCreateIn(Schema):
 
 @router.get('/', response=List[ActivityOut])
 def list_activities(request, category: Optional[str] = None, search: Optional[str] = None):
-    """List activities (Programs, Events, Workshops, Campaigns, Volunteer Opportunities)."""
+    """List activities (Programs, Events, Workshops, Campaigns, Volunteer Opportunities). Auto-seeds if DB empty."""
+    if Activity.objects.count() == 0:
+        try:
+            import seed_db
+            seed_db.run()
+        except Exception as err:
+            print("Auto-seeding error in activities list:", err)
+
     qs = Activity.objects.filter(status=Activity.Status.OPEN)
     if category:
         qs = qs.filter(category__iexact=category)

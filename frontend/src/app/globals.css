@@ -162,7 +162,7 @@
 @media print {
   @page {
     size: portrait;
-    margin: 0;
+    margin: 10mm;
   }
 
   body {
@@ -183,21 +183,24 @@
   }
 
   #id-card-printable {
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 420px !important;
-    max-width: 420px !important;
-    margin: 0 auto !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    margin: 20px auto !important;
+    padding: 36px !important;
+    border-radius: 28px !important;
     background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #0b132b 100%) !important;
-    border: 2px solid #00d47e !important;
+    border: 3px solid #00d47e !important;
     color: #ffffff !important;
     box-shadow: none !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    zoom: 1.25;
   }
 
   #id-card-printable * {

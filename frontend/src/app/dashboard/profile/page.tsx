@@ -69,7 +69,7 @@ export default function ProfilePage() {
       if (activeStep < 4) {
         setActiveStep(prev => prev + 1);
       } else if (activeStep === 4 && updated.profile_completion_percentage === 100) {
-        router.push('/dashboard/id-card');
+        router.push('/opportunities');
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Failed to save changes.' });
@@ -85,7 +85,10 @@ export default function ProfilePage() {
     try {
       const updated = await applyForVolunteerVerification(session.accessToken);
       setProfile(updated);
-      setMessage({ type: 'success', text: 'Volunteer Verification application submitted! Admin review is in progress.' });
+      setMessage({ type: 'success', text: 'Volunteer Verification application submitted! Redirecting to Opportunities page...' });
+      setTimeout(() => {
+        router.push('/opportunities');
+      }, 1500);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Failed to submit volunteer application.' });
     } finally {

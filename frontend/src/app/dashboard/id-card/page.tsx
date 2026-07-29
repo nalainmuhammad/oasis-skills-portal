@@ -174,7 +174,7 @@ export default function IdCardPage() {
                 {idCard.full_name}
               </h2>
               <p className="text-xs text-white/70 font-mono mt-1">
-                REG NO: <span className="text-oasis-emerald font-bold">{idCard.registration_number?.includes('VOL') ? idCard.registration_number : `OASIS-VOL-2026-${idCard.registration_number?.replace('OASIS-', '') || '10001'}`}</span>
+                REG NO: <span className="text-oasis-emerald font-bold">{idCard.registration_number}</span>
               </p>
             </div>
 

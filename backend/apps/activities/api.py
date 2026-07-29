@@ -257,6 +257,60 @@ def create_activity(request, data: ActivityCreateIn):
     }
 
 
+class ActivityUpdateIn(Schema):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    available_positions: Optional[List[str]] = None
+    eligibility_criteria: Optional[str] = None
+    required_skills: Optional[List[str]] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    deadline: Optional[date] = None
+    total_seats: Optional[int] = None
+    status: Optional[str] = None
+
+
+@router.patch('/admin/{public_id}/update', response=ActivityOut, auth=jwt_auth)
+def update_activity(request, public_id: uuid.UUID, data: ActivityUpdateIn):
+    user = request.auth_user
+    if user.role != 'admin' and not user.is_staff:
+        raise HttpError(403, "Admin access required.")
+
+    act = get_object_or_404(Activity, public_id=public_id)
+    for field, val in data.dict(exclude_unset=True).items():
+        setattr(act, field, val)
+    act.save()
+
+    return {
+        'public_id': act.public_id,
+        'title': act.title,
+        'description': act.description,
+        'category': act.category,
+        'available_positions': act.available_positions or [],
+        'eligibility_criteria': act.eligibility_criteria,
+        'required_skills': act.required_skills or [],
+        'start_date': act.start_date,
+        'end_date': act.end_date,
+        'deadline': act.deadline,
+        'total_seats': act.total_seats,
+        'remaining_seats': act.remaining_seats,
+        'status': act.status,
+        'created_at': act.created_at.isoformat(),
+    }
+
+
+@router.delete('/admin/{public_id}/delete', auth=jwt_auth)
+def delete_activity(request, public_id: uuid.UUID):
+    user = request.auth_user
+    if user.role != 'admin' and not user.is_staff:
+        raise HttpError(403, "Admin access required.")
+
+    act = get_object_or_404(Activity, public_id=public_id)
+    act.delete()
+    return {'message': 'Activity deleted successfully'}
+
+
 @router.get('/admin/applications/all', response=List[ApplicationOut], auth=jwt_auth)
 def list_all_applications(request, status_filter: Optional[str] = None):
     user = request.auth_user

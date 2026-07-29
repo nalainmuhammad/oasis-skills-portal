@@ -139,3 +139,34 @@ export async function updateApplicationStatus(
 
   return await res.json();
 }
+
+export async function updateActivity(public_id: string, data: Partial<Activity>, token: string): Promise<Activity> {
+  const res = await fetch(`${API_BASE}/api/activities/admin/${public_id}/update`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to update activity' }));
+    throw new Error(err.detail || 'Failed to update activity');
+  }
+
+  return await res.json();
+}
+
+export async function deleteActivity(public_id: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/activities/admin/${public_id}/delete`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to delete activity');
+  }
+}

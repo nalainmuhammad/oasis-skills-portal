@@ -228,3 +228,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.save()
 
 
+class PendingVolunteer(User):
+    class Meta:
+        proxy = True
+        verbose_name = 'Pending Volunteer Request'
+        verbose_name_plural = 'Pending Volunteer Requests (Action Required)'
+
+
+class ApprovedVolunteer(User):
+    class Meta:
+        proxy = True
+        verbose_name = 'Approved Volunteer'
+        verbose_name_plural = 'Approved Volunteers Roster'
+
+
+

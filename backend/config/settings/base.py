@@ -336,7 +336,17 @@ UNFOLD = {
                 "title": "User & Volunteer Management",
                 "items": [
                     {
-                        "title": "Users & Volunteers",
+                        "title": "Pending Volunteer Approvals",
+                        "icon": "how_to_reg",
+                        "link": "/admin/users/pendingvolunteer/",
+                    },
+                    {
+                        "title": "Approved Volunteers",
+                        "icon": "verified",
+                        "link": "/admin/users/approvedvolunteer/",
+                    },
+                    {
+                        "title": "All Users & Members",
                         "icon": "people",
                         "link": "/admin/users/user/",
                     },

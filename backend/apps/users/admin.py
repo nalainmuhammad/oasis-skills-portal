@@ -4,7 +4,7 @@ Django Admin — Users (Unfold themed).
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from unfold.admin import ModelAdmin
-from .models import User
+from .models import User, PendingVolunteer, ApprovedVolunteer
 
 
 @admin.register(User)
@@ -53,4 +53,23 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     def reject_selected_volunteers(self, request, queryset):
         updated = queryset.update(volunteer_status=User.VolunteerStatus.REJECTED)
         self.message_user(request, f"Marked {updated} volunteer request(s) as rejected.")
+
+
+@admin.register(PendingVolunteer)
+class PendingVolunteerAdmin(UserAdmin):
+    list_display = ('full_name', 'email', 'institution_name', 'phone_number', 'volunteer_status', 'created_at')
+    ordering = ('-created_at',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(volunteer_status=User.VolunteerStatus.PENDING)
+
+
+@admin.register(ApprovedVolunteer)
+class ApprovedVolunteerAdmin(UserAdmin):
+    list_display = ('full_name', 'email', 'registration_number', 'position', 'institution_name', 'created_at')
+    ordering = ('-created_at',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(volunteer_status=User.VolunteerStatus.APPROVED)
+
 

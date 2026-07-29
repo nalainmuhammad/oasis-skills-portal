@@ -43,6 +43,8 @@ class Activity(models.Model):
     class Meta:
         db_table = 'activities'
         ordering = ['-created_at']
+        verbose_name = 'Activity & Opportunity'
+        verbose_name_plural = 'Activities & Opportunities'
 
     def __str__(self):
         return f"{self.title} ({self.category})"
@@ -74,6 +76,8 @@ class ActivityApplication(models.Model):
         db_table = 'activity_applications'
         unique_together = ('activity', 'applicant')
         ordering = ['-applied_at']
+        verbose_name = 'Opportunity Application'
+        verbose_name_plural = 'Volunteer & Opportunity Applications'
 
     def __str__(self):
         return f"{self.applicant.full_name} -> {self.activity.title} ({self.applied_position})"

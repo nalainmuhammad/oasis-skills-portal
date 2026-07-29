@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Activity } from "@/types";
-import { getActivities, createActivity } from "@/lib/api/activities";
+import { getActivities, createActivity, deleteActivity } from "@/lib/api/activities";
 import { Button } from "@/components/ui/button";
-import { HeartHandshake, Plus, Calendar, Users, CheckCircle2, X } from "lucide-react";
+import { HeartHandshake, Plus, Calendar, Users, CheckCircle2, X, Trash2 } from "lucide-react";
 
 export default function AdminActivitiesPage() {
   const { data: session } = useSession();
@@ -73,15 +73,27 @@ export default function AdminActivitiesPage() {
     }
   };
 
+  const handleDelete = async (public_id: string) => {
+    if (!token) return;
+    if (!confirm("Are you sure you want to delete this opportunity? This cannot be undone.")) return;
+
+    try {
+      await deleteActivity(public_id, token);
+      setActivities(prev => prev.filter(a => a.public_id !== public_id));
+    } catch (err: any) {
+      alert(err.message || "Failed to delete activity.");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-10 max-w-7xl">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">
-            Activity & Program Management
+            Activity & Opportunity Management
           </h1>
           <p className="text-oasis-muted text-sm mt-1">
-            Create and manage Oasis programs, events, workshops, campaigns, and volunteer opportunities.
+            Create, edit, and delete Oasis programs, events, workshops, campaigns, and volunteer opportunities.
           </p>
         </div>
 
@@ -89,22 +101,31 @@ export default function AdminActivitiesPage() {
           onClick={() => setShowCreateModal(true)}
           className="bg-oasis-emerald hover:bg-oasis-emeraldLight text-black font-semibold rounded-xl px-5 py-2.5 shadow-lg shadow-oasis-emerald/20 flex items-center gap-2"
         >
-          <Plus size={18} /> Create New Activity
+          <Plus size={18} /> Create New Opportunity
         </Button>
       </div>
 
       {/* Activities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activities.map(act => (
-          <div key={act.public_id} className="glass-card rounded-3xl p-6 border border-foreground/10 flex flex-col justify-between">
+          <div key={act.public_id} className="glass-card rounded-3xl p-6 border border-foreground/10 flex flex-col justify-between relative group">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="px-3 py-1 rounded-full bg-oasis-emerald/10 text-oasis-emerald text-xs font-bold uppercase tracking-wider">
                   {act.category}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">
-                  {act.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">
+                    {act.status}
+                  </span>
+                  <button
+                    onClick={() => handleDelete(act.public_id)}
+                    className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 transition-colors"
+                    title="Delete Opportunity"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
 
               <h3 className="text-xl font-bold text-foreground mb-2">{act.title}</h3>
@@ -131,7 +152,7 @@ export default function AdminActivitiesPage() {
               <X size={20} />
             </button>
 
-            <h2 className="text-2xl font-bold text-foreground mb-4">Create Activity / Program</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Create Opportunity / Program</h2>
 
             <form onSubmit={handleCreate} className="space-y-4">
               {error && <div className="p-3 bg-red-500/20 text-red-400 rounded-xl text-xs">{error}</div>}
@@ -222,7 +243,7 @@ export default function AdminActivitiesPage() {
                 disabled={isSubmitting}
                 className="w-full bg-oasis-emerald text-black font-bold py-3 rounded-xl shadow-lg mt-4"
               >
-                {isSubmitting ? "Creating..." : "Publish Activity"}
+                {isSubmitting ? "Creating..." : "Publish Opportunity"}
               </Button>
             </form>
           </div>

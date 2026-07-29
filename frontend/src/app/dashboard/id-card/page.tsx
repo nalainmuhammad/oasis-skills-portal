@@ -1,45 +1,43 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { IdCardData } from "@/types";
 import { getIdCard } from "@/lib/api/profile";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Printer, AlertTriangle, ArrowLeft, CheckCircle2, HeartHandshake, Award } from "lucide-react";
-import Link from "next/link";
+import { ShieldCheck, HeartHandshake, Printer, AlertCircle, CheckCircle2, Clock, UserCheck } from "lucide-react";
 
 export default function IdCardPage() {
-  const { data: session } = useSession();
-  const router = useRouter();
-
+  const { data: session, status } = useSession();
   const [idCard, setIdCard] = useState<IdCardData | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [origin, setOrigin] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin);
-    }
-  }, []);
-
-  useEffect(() => {
-    async function load() {
+    async function loadCard() {
       if (!session?.accessToken) return;
+      setIsLoading(true);
+      setError(null);
+
       try {
         const data = await getIdCard(session.accessToken);
         setIdCard(data);
       } catch (err: any) {
-        setError(err.message || 'Failed to load ID card.');
+        setError(err.message || "Failed to load ID card");
       } finally {
         setIsLoading(false);
       }
     }
-    load();
-  }, [session?.accessToken]);
+
+    if (status === "authenticated") {
+      loadCard();
+    } else if (status === "unauthenticated") {
+      setIsLoading(false);
+      setError("Please sign in to access your Digital ID Card");
+    }
+  }, [session, status]);
 
   const handlePrint = () => {
     window.print();
@@ -47,8 +45,9 @@ export default function IdCardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-oasis-emerald border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-oasis-emerald border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-oasis-muted text-sm font-medium">Generating your official Oasis Digital ID Card...</p>
       </div>
     );
   }
@@ -56,31 +55,24 @@ export default function IdCardPage() {
   if (error || !idCard) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-xl text-center">
-        <div className="glass-card rounded-3xl p-8 border border-amber-500/20 bg-amber-500/5">
-          <AlertTriangle size={56} className="text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-foreground mb-2">ID Card Locked</h2>
-          <p className="text-oasis-muted text-sm mb-6">
-            {error || 'Your profile must reach 100% completion before your official Oasis Foundation Digital ID Card can be generated.'}
-          </p>
-          <Link
-            href="/dashboard/profile"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-oasis-emerald text-black font-semibold rounded-xl hover:bg-oasis-emeraldLight transition-colors"
-          >
-            Complete Profile Now <ArrowLeft className="rotate-180" size={16} />
-          </Link>
+        <div className="glass-card rounded-3xl p-8 border border-red-500/20 space-y-4">
+          <div className="w-14 h-14 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto">
+            <AlertCircle size={28} />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">ID Card Unavailable</h2>
+          <p className="text-oasis-muted text-sm">{error || "You must complete 100% of your profile to access your official ID Card."}</p>
+          <Button onClick={() => window.location.href = '/dashboard/profile'} className="bg-oasis-emerald text-black font-bold rounded-xl px-6 py-2.5">
+            Complete Profile Now
+          </Button>
         </div>
       </div>
     );
   }
 
-  // Generate live working QR Code URL pointing directly to localhost / domain verify page
-  const verificationUrl = origin 
-    ? `${origin}/verify-id/${encodeURIComponent(idCard.registration_number || idCard.qr_verification_code)}`
-    : idCard.verification_url;
-
+  const verificationUrl = idCard.verification_url || `https://oasisportal.tech/verify-id/${idCard.qr_verification_code || idCard.registration_number}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=00d47e&bgcolor=0f0f23`;
 
-  const isVolunteer = idCard.position?.toLowerCase().includes('volunteer') || idCard.registration_number?.includes('VOL');
+  const isApprovedVolunteer = idCard.volunteer_status === 'approved' || idCard.user_type === 'volunteer' || idCard.registration_number?.includes('VOL');
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-4xl print:p-0 print:m-0 print:max-w-none">
@@ -119,7 +111,7 @@ export default function IdCardPage() {
             <ShieldCheck size={180} />
           </div>
 
-          {/* Card Header with Official Website Logo */}
+          {/* Card Header */}
           <div className="flex items-center justify-between border-b border-white/15 pb-4 mb-5 relative z-10">
             <div className="flex items-center gap-3">
               <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
@@ -137,12 +129,14 @@ export default function IdCardPage() {
                   OASIS FOUNDATION
                 </h3>
                 <p className="text-[10px] text-oasis-emerald uppercase font-bold tracking-widest mt-1 flex items-center gap-1">
-                  <HeartHandshake size={12} /> Official Volunteering Card
+                  <HeartHandshake size={12} /> {isApprovedVolunteer ? "Official Volunteering Card" : "Official Member Card"}
                 </p>
               </div>
             </div>
-            <div className="px-2.5 py-1 rounded-full bg-oasis-emerald/20 border border-oasis-emerald/50 text-oasis-emerald text-[9px] font-black uppercase tracking-widest shadow-sm">
-              VERIFIED
+            <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${
+              isApprovedVolunteer ? 'bg-oasis-emerald/20 border border-oasis-emerald/50 text-oasis-emerald' : 'bg-blue-500/20 border border-blue-400/50 text-blue-300'
+            }`}>
+              {isApprovedVolunteer ? 'VERIFIED' : (idCard.volunteer_status === 'pending' ? 'PENDING VOLUNTEER' : 'MEMBER')}
             </div>
           </div>
 
@@ -163,9 +157,15 @@ export default function IdCardPage() {
                   </div>
                 )}
               </div>
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-oasis-emerald text-black text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1 whitespace-nowrap">
-                <HeartHandshake size={11} /> Volunteer
-              </div>
+              {isApprovedVolunteer ? (
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-oasis-emerald text-black text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1 whitespace-nowrap">
+                  <HeartHandshake size={11} /> Volunteer
+                </div>
+              ) : (
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-blue-500/80 text-white text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1 whitespace-nowrap border border-blue-300/40">
+                  <UserCheck size={11} /> Member
+                </div>
+              )}
             </div>
 
             {/* User Name & Details */}
@@ -182,8 +182,8 @@ export default function IdCardPage() {
             <div className="w-full bg-white/5 rounded-2xl p-3.5 border border-white/10 text-left text-xs space-y-2">
               <div className="flex justify-between">
                 <span className="text-white/50 font-medium">Card Type:</span>
-                <span className="font-bold text-oasis-emerald">
-                  Volunteering Card
+                <span className={`font-bold ${isApprovedVolunteer ? 'text-oasis-emerald' : 'text-blue-300'}`}>
+                  {isApprovedVolunteer ? 'Volunteering Card' : 'Member Card'}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -196,8 +196,8 @@ export default function IdCardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-white/50 font-medium">Status:</span>
-                <span className="font-bold text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 size={13} /> Active & Verified
+                <span className={`font-bold flex items-center gap-1 ${isApprovedVolunteer ? 'text-emerald-400' : 'text-blue-300'}`}>
+                  <CheckCircle2 size={13} /> {isApprovedVolunteer ? 'Active & Verified Volunteer' : (idCard.volunteer_status === 'pending' ? 'Member (Verification Pending)' : 'Active Member')}
                 </span>
               </div>
             </div>
@@ -216,6 +216,14 @@ export default function IdCardPage() {
             </div>
           </div>
         </div>
+
+        {/* Pending Verification Notice */}
+        {idCard.volunteer_status === 'pending' && (
+          <div className="mt-6 max-w-[420px] w-full p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs text-center flex items-center justify-center gap-2 font-medium">
+            <Clock size={16} className="shrink-0" />
+            <span>Your Volunteer Verification Application is awaiting admin approval. Upon review, your card will automatically upgrade to the Official Volunteering Card.</span>
+          </div>
+        )}
       </div>
     </div>
   );

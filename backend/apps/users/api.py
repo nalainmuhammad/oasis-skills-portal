@@ -505,6 +505,8 @@ class IdCardOut(Schema):
     qr_verification_code: str
     verification_url: str
     profile_completion_percentage: int
+    volunteer_status: str = 'none'
+    user_type: str = 'member'
 
 
 
@@ -967,13 +969,15 @@ def get_id_card(request):
         'full_name': user.full_name,
         'volunteer_id': reg_num,
         'registration_number': reg_num,
-        'position': user.position or 'Volunteer',
+        'position': user.position or ('Volunteer' if is_approved_vol else 'Member'),
         'foundation_name': 'OASIS Foundation',
         'joining_date': user.created_at.date(),
         'photograph_url': user.avatar_url,
         'qr_verification_code': qr_code,
         'verification_url': ver_url,
         'profile_completion_percentage': user.profile_completion_percentage,
+        'volunteer_status': user.volunteer_status or 'none',
+        'user_type': user.user_type or 'member',
     }
 
 

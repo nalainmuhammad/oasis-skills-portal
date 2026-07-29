@@ -114,6 +114,8 @@ export interface IdCardData {
   qr_verification_code: string;
   verification_url: string;
   profile_completion_percentage: number;
+  volunteer_status?: string;
+  user_type?: string;
 }
 
 export interface Activity {

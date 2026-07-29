@@ -202,11 +202,11 @@ export function UserMenu() {
                 <User size={16} className="text-oasis-emerald" /> Dashboard Hub
               </Link>
               <Link 
-                href="/dashboard/profile" 
+                href="/dashboard/settings" 
                 className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-foreground/5 text-sm text-foreground/80 hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                <Settings size={16} className="text-blue-400" /> Progressive Profile
+                <Settings size={16} className="text-blue-400" /> Settings & Profile
               </Link>
               <Link 
                 href="/dashboard/id-card" 

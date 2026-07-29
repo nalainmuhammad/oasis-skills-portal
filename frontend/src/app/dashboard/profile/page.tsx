@@ -113,10 +113,10 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-oasis-emerald/10 border border-oasis-emerald/20 text-oasis-emerald text-xs font-bold uppercase tracking-wider mb-3">
-              <Sparkles size={14} /> Profile Completion System
+              <Sparkles size={14} /> Account Settings & Profile System
             </div>
             <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
-              Complete Your Oasis Profile
+              Account Settings & Information
             </h1>
             <p className="text-oasis-muted text-sm max-w-xl">
               100% profile completion is required to unlock your verified Digital ID Card and apply for volunteer opportunities and programs.

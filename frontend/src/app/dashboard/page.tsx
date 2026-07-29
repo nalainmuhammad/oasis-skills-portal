@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
 import { 
   PlayCircle, Trophy, Sparkles, CheckCircle2, ShieldCheck, 
-  HeartHandshake, BookOpen, AlertCircle, ArrowRight, User, Award, CreditCard 
+  HeartHandshake, BookOpen, AlertCircle, ArrowRight, User, Award, CreditCard, Settings 
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-3 py-1 rounded-full bg-oasis-emerald/10 border border-oasis-emerald/20 text-oasis-emerald text-xs font-bold uppercase tracking-wider">
-                  {profile?.user_type === 'volunteer' ? 'Oasis Volunteer' : 'Oasis Member'}
+                  {profile?.user_type === 'volunteer' || profile?.volunteer_status === 'approved' ? 'Oasis Verified Volunteer' : 'Oasis Member'}
                 </span>
                 {profile?.registration_number && (
                   <span className="px-3 py-1 rounded-full bg-foreground/5 border border-foreground/10 text-foreground/70 font-mono text-xs font-bold">
@@ -46,30 +46,30 @@ export default async function DashboardPage() {
                 Welcome back, {session?.user?.name || 'Member'}!
               </h1>
               <p className="text-oasis-muted text-sm mt-1">
-                Manage your volunteer activities, progressive profile, ID card, and learning courses.
+                Your personal hub for volunteer opportunities, earned certificates, and learning courses.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <Link
-                href="/dashboard/profile"
-                className="px-5 py-2.5 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 text-foreground text-sm font-semibold transition-colors"
+                href="/dashboard/settings"
+                className="px-5 py-2.5 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 text-foreground text-sm font-semibold transition-colors flex items-center gap-2"
               >
-                Edit Profile
+                <Settings size={16} className="text-blue-400" /> Account Settings
               </Link>
               {isComplete ? (
                 <Link
                   href="/dashboard/id-card"
                   className="px-5 py-2.5 rounded-xl bg-oasis-emerald hover:bg-oasis-emeraldLight text-black text-sm font-semibold transition-all shadow-lg shadow-oasis-emerald/20 flex items-center gap-2"
                 >
-                  <CreditCard size={16} /> View ID Card
+                  <CreditCard size={16} /> Digital ID Card
                 </Link>
               ) : (
                 <Link
-                  href="/dashboard/profile"
+                  href="/dashboard/settings"
                   className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold transition-all flex items-center gap-2"
                 >
-                  <AlertCircle size={16} /> Complete Profile ({completion}%)
+                  <AlertCircle size={16} /> Complete Settings ({completion}%)
                 </Link>
               )}
             </div>
@@ -81,56 +81,14 @@ export default async function DashboardPage() {
       <section className="py-10 flex-grow">
         <div className="container mx-auto px-4 md:px-6 space-y-12">
           
-          {/* PROFILE COMPLETION WIDGET */}
-          <div className="glass-card rounded-3xl p-6 md:p-8 border border-foreground/10 relative overflow-hidden">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="space-y-2 flex-grow">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="text-oasis-emerald" size={20} />
-                  <h2 className="text-xl font-bold text-foreground">Profile Completion System</h2>
-                </div>
-                <p className="text-sm text-oasis-muted max-w-xl">
-                  {isComplete 
-                    ? "Your profile is 100% complete! Your digital ID card is unlocked, and you are fully eligible to apply for all volunteer opportunities."
-                    : "Complete all remaining sections to unlock your verified Digital ID Card and apply for volunteer activities."}
-                </p>
-                <div className="pt-2 flex flex-wrap gap-2">
-                  <span className="px-3 py-1 rounded-lg bg-oasis-emerald/20 text-oasis-emerald text-xs font-semibold">
-                    ✓ Personal Info (25%)
-                  </span>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${profile?.is_educational_complete ? 'bg-oasis-emerald/20 text-oasis-emerald' : 'bg-foreground/5 text-foreground/40'}`}>
-                    {profile?.is_educational_complete ? '✓ Educational Info (50%)' : '○ Educational Info (50%)'}
-                  </span>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${profile?.is_address_complete ? 'bg-oasis-emerald/20 text-oasis-emerald' : 'bg-foreground/5 text-foreground/40'}`}>
-                    {profile?.is_address_complete ? '✓ Address Info (75%)' : '○ Address Info (75%)'}
-                  </span>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${profile?.is_emergency_social_complete ? 'bg-oasis-emerald/20 text-oasis-emerald' : 'bg-foreground/5 text-foreground/40'}`}>
-                    {profile?.is_emergency_social_complete ? '✓ Emergency & Social (100%)' : '○ Emergency & Social (100%)'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="shrink-0 w-full md:w-56 text-center bg-foreground/5 p-4 rounded-2xl border border-foreground/10">
-                <div className="text-2xl font-bold text-oasis-emerald mb-1">{completion}%</div>
-                <Progress value={completion} className="h-2.5 mb-3 bg-foreground/10" />
-                <Link
-                  href="/dashboard/profile"
-                  className="inline-flex items-center justify-center w-full py-2 px-3 rounded-xl bg-oasis-emerald/20 text-oasis-emerald hover:bg-oasis-emerald/30 font-semibold text-xs transition-colors"
-                >
-                  {isComplete ? "Review Profile" : "Continue Completion"} <ArrowRight className="ml-1" size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* MY ACTIVITY APPLICATIONS */}
+          {/* SECTION 1: MY ACTIVITY APPLICATIONS */}
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
                 <HeartHandshake className="text-oasis-emerald" /> Volunteer Opportunities & Applications
               </h2>
               <Link href="/opportunities" className="text-oasis-emerald hover:underline text-sm font-medium flex items-center gap-1">
-                Browse Opportunities <ArrowRight size={14} />
+                Explore Opportunities <ArrowRight size={14} />
               </Link>
             </div>
 
@@ -175,7 +133,7 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          {/* MY CERTIFICATES */}
+          {/* SECTION 2: MY CERTIFICATES */}
           {certificates.length > 0 && (
             <div>
               <h2 className="text-2xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
@@ -184,24 +142,26 @@ export default async function DashboardPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {certificates.map(cert => (
-                  <div key={cert.verification_uuid} className="glass-card rounded-2xl p-5 border border-oasis-gold/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-oasis-gold bg-oasis-gold/10 px-2.5 py-0.5 rounded-full">
-                        {cert.cert_type}
-                      </span>
-                      <span className="text-xs text-foreground/50 font-mono">{cert.certificate_number}</span>
+                  <div key={cert.verification_uuid} className="glass-card rounded-2xl p-5 border border-oasis-gold/30 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-oasis-gold bg-oasis-gold/10 px-2.5 py-0.5 rounded-full">
+                          {cert.cert_type}
+                        </span>
+                        <span className="text-xs text-foreground/50 font-mono">{cert.certificate_number}</span>
+                      </div>
+
+                      <h3 className="text-base font-bold text-foreground line-clamp-1 mb-1">{cert.title_snapshot}</h3>
+                      <p className="text-xs text-oasis-muted mb-4">Issued to {cert.recipient_name_snapshot}</p>
                     </div>
 
-                    <h3 className="text-base font-bold text-foreground line-clamp-1 mb-1">{cert.title_snapshot}</h3>
-                    <p className="text-xs text-oasis-muted mb-4">Issued to {cert.recipient_name_snapshot}</p>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-foreground/10 text-xs font-semibold">
-                      <a href={cert.verification_url} target="_blank" rel="noopener noreferrer" className="text-oasis-gold hover:underline">
+                    <div className="flex items-center justify-between pt-3 border-t border-foreground/10 text-xs font-semibold">
+                      <a href={cert.verification_url} target="_blank" rel="noopener noreferrer" className="text-oasis-gold hover:underline flex items-center gap-1">
                         Verify QR
                       </a>
-                      <a href={`/api/certificates/${cert.verification_uuid}/download`} className="text-foreground/70 hover:text-foreground">
-                        Download PDF
-                      </a>
+                      <Link href={`/verify/${cert.verification_uuid}`} className="text-oasis-emerald hover:underline font-bold">
+                        View & Download PDF
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -209,7 +169,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {/* COURSES (INTEGRATED LEARNING PORTAL) */}
+          {/* SECTION 3: COURSES (INTEGRATED LEARNING PORTAL) */}
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">

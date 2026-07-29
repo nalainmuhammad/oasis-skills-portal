@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Completion - {{ certificate.recipient_name_snapshot }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #e6edf3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .certificate-container {
+            width: 1000px;
+            height: 700px;
+            background: linear-gradient(145deg, #161b22, #0d1117);
+            border: 4px solid #ffc641;
+            box-shadow: 0 0 50px rgba(255, 198, 65, 0.2);
+            position: relative;
+            padding: 40px;
+            box-sizing: border-box;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Decorative corners */
+        .corner {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 4px solid #ffc641;
+            opacity: 0.8;
+        }
+        .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        .header {
+            margin-top: 30px;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            color: #00d47e;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .logo span {
+            color: #ffc641;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 56px;
+            color: #ffc641;
+            margin: 0;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #8b949e;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .content {
+            margin-top: 60px;
+        }
+
+        .presented-to {
+            font-size: 16px;
+            color: #8b949e;
+            margin-bottom: 10px;
+        }
+
+        .recipient {
+            font-family: 'Cinzel', serif;
+            font-size: 48px;
+            color: #e6edf3;
+            margin: 0;
+            border-bottom: 1px solid rgba(255, 198, 65, 0.5);
+            display: inline-block;
+            padding: 0 40px 10px 40px;
+        }
+
+        .for-completion {
+            font-size: 16px;
+            color: #8b949e;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .course-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #00d47e;
+            margin: 0;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 60px;
+            left: 80px;
+            right: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .date-section, .signature-section {
+            text-align: center;
+            width: 250px;
+        }
+
+        .line {
+            border-bottom: 1px solid rgba(255, 198, 65, 0.5);
+            margin-bottom: 10px;
+            font-size: 18px;
+            padding-bottom: 5px;
+        }
+
+        .label {
+            font-size: 14px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .seal {
+            width: 120px;
+            height: 120px;
+            border: 4px dashed #ffc641;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            color: #ffc641;
+            text-align: center;
+            background: rgba(255, 198, 65, 0.05);
+            transform: rotate(-15deg);
+        }
+
+        .uuid {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            left: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #484f58;
+            font-family: monospace;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .certificate-container {
+                box-shadow: none;
+                border: 4px solid #ffc641; /* Kept for print */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="certificate-container">
+        <!-- Corners -->
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+
+        <div class="header">
+            <div class="logo">OASIS <span>FOUNDATION</span></div>
+            <h1 class="title">Certificate</h1>
+            <div class="subtitle">Of Achievement</div>
+        </div>
+
+        <div class="content">
+            <div class="presented-to">This is proudly presented to</div>
+            <h2 class="recipient">{{ certificate.recipient_name_snapshot }}</h2>
+            
+            <div class="for-completion">For successfully completing the course</div>
+            <h3 class="course-title">{{ certificate.course_title_snapshot }}</h3>
+        </div>
+
+        <div class="footer">
+            <div class="date-section">
+                <div class="line">{{ certificate.issued_at|date:"F j, Y" }}</div>
+                <div class="label">Date Issued</div>
+            </div>
+
+            <div class="seal">
+                OASIS<br>OFFICIAL<br>VERIFIED
+            </div>
+
+            <div class="signature-section">
+                <div class="line" style="font-family: 'Cinzel', serif; color: #00d47e; font-style: italic;">Oasis Admin</div>
+                <div class="label">Lead Instructor</div>
+            </div>
+        </div>
+
+        <div class="uuid">
+            Credential ID: {{ certificate.verification_uuid }} | Verify at: {{ request.get_host }}/verify
+        </div>
+    </div>
+
+    <script>
+        // Optional: Trigger print dialog on load if user adds ?print=1
+        if (window.location.search.includes('print=1')) {
+            window.print();
+        }
+    </script>
+</body>
+</html>

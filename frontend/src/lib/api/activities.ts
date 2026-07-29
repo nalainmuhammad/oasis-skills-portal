@@ -46,7 +46,8 @@ export async function applyActivity(public_id: string, position: string, token: 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Failed to apply' }));
-    throw new Error(err.detail || 'Failed to apply for activity');
+    const msg = typeof err.detail === 'string' ? err.detail : (err.message || (Array.isArray(err.detail) ? err.detail[0]?.msg : 'Failed to apply for activity'));
+    throw new Error(msg);
   }
 
   return await res.json();

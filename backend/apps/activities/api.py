@@ -134,12 +134,15 @@ def apply_activity(request, public_id: uuid.UUID, data: ApplyIn):
     """
     Apply for an activity. Strictly requires 100% profile completion!
     """
-    user = request.auth_user
-    if user.profile_completion_percentage < 100:
-        raise HttpError(400, f"Only volunteers with 100% completed profiles can apply for activities. Your profile is currently {user.profile_completion_percentage}% complete.")
-
-    if user.volunteer_status != User.VolunteerStatus.APPROVED and user.user_type != 'volunteer':
-        raise HttpError(403, "Only Verified Volunteers can apply for opportunities. Please submit your Volunteer Verification Application from your Profile Dashboard.")
+    is_eligible = (
+        user.volunteer_status == User.VolunteerStatus.APPROVED or 
+        user.user_type == 'volunteer' or 
+        user.role == 'admin' or 
+        user.is_superuser or
+        user.profile_completion_percentage == 100
+    )
+    if not is_eligible:
+        raise HttpError(403, f"Only 100% completed members or verified volunteers can apply. Your current completion: {user.profile_completion_percentage}%.")
 
     act = get_object_or_404(Activity, public_id=public_id)
     if act.status != Activity.Status.OPEN:

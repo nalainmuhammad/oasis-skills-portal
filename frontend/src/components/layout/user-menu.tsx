@@ -18,6 +18,8 @@ export function UserMenu() {
 
   const isAdmin = session?.user?.role === 'admin';
 
+  const [regNum, setRegNum] = useState<string>((session?.user as any)?.registrationNumber || '');
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -32,6 +34,19 @@ export function UserMenu() {
   }, []);
 
   useEffect(() => {
+    async function fetchFreshProfile() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const prof = await res.json();
+          if (prof.registration_number) setRegNum(prof.registration_number);
+        }
+      } catch (err) {}
+    }
+
     async function fetchPending() {
       if (isAdmin && token) {
         try {
@@ -42,6 +57,8 @@ export function UserMenu() {
         }
       }
     }
+
+    fetchFreshProfile();
     fetchPending();
   }, [isAdmin, token]);
 
@@ -160,9 +177,9 @@ export function UserMenu() {
             <div className="px-4 py-3 border-b border-foreground/10 mb-2">
               <p className="text-sm font-bold text-foreground truncate">{session.user?.name}</p>
               <p className="text-xs text-foreground/50 truncate mb-1">{session.user?.email}</p>
-              {(session.user as any)?.registrationNumber && (
+              {(regNum || (session.user as any)?.registrationNumber) && (
                 <span className="inline-block px-2 py-0.5 rounded bg-oasis-emerald/10 text-oasis-emerald font-mono text-[10px] font-bold">
-                  {(session.user as any).registrationNumber}
+                  {regNum || (session.user as any).registrationNumber}
                 </span>
               )}
             </div>

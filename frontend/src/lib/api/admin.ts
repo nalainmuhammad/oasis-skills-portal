@@ -1,6 +1,6 @@
 import { AdminStats, UserProfile } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
 
 export async function getAdminStats(token: string): Promise<AdminStats | null> {
   try {

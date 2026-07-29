@@ -2,7 +2,7 @@ import { ShieldCheck, CheckCircle2, AlertCircle, School, MapPin } from "lucide-r
 
 async function getVerificationData(regOrUuid: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
     const res = await fetch(`${apiUrl}/api/admin/volunteers?search=${encodeURIComponent(regOrUuid)}`, {
       cache: 'no-store'
     });

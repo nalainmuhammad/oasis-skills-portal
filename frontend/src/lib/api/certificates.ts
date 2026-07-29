@@ -17,7 +17,7 @@ export interface CertificateItem {
 
 export type Certificate = CertificateItem;
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
 
 export async function getMyCertificates(token?: string): Promise<CertificateItem[]> {
   try {

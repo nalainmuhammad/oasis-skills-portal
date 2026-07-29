@@ -36,7 +36,7 @@ export const {
         
         try {
           // Replace with real backend call
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/login`, {
             method: 'POST',
             body: JSON.stringify(credentials),
             headers: { "Content-Type": "application/json" }
@@ -47,7 +47,7 @@ export const {
           
           if (data.access_token) {
             // Fetch user profile
-            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/me`, {
+            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/me`, {
               headers: { "Authorization": `Bearer ${data.access_token}` }
             });
             
@@ -86,7 +86,7 @@ export const {
         try {
           const idToken = account.id_token;
           if (idToken) {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
             const res = await fetch(`${apiUrl}/api/auth/google`, {
               method: 'POST',
               body: JSON.stringify({ id_token: idToken }),

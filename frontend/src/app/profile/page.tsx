@@ -51,7 +51,7 @@ export default function ProfileSettingsPage() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/me`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/me`, {
         headers: { "Authorization": `Bearer ${session!.accessToken}` }
       });
       if (res.ok) {
@@ -116,7 +116,7 @@ export default function ProfileSettingsPage() {
         social_links: formData.social_links
       };
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/me`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/me`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +148,7 @@ export default function ProfileSettingsPage() {
     setMessage({ text: "", type: "" });
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/password`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/password`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -177,7 +177,7 @@ export default function ProfileSettingsPage() {
     setIsLoading(true);
     setMessage({ text: "", type: "" });
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/send-verification-otp`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/send-verification-otp`, {
         method: 'POST',
         headers: {
           "Authorization": `Bearer ${session?.accessToken}`
@@ -198,7 +198,7 @@ export default function ProfileSettingsPage() {
 
   const handleSaveIcon = async (iconId: string) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/me`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/me`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -222,7 +222,7 @@ export default function ProfileSettingsPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/upload-avatar`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/auth/upload-avatar`, {
         method: 'POST',
         headers: {
           "Authorization": `Bearer ${session.accessToken}`

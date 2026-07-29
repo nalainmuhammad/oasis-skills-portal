@@ -1,6 +1,6 @@
 import { NotificationItem } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
 
 export async function getNotifications(token: string): Promise<NotificationItem[]> {
   try {

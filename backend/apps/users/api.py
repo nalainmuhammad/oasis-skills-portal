@@ -1018,27 +1018,57 @@ def get_id_card(request):
 @router.get('/public-verify-id/{id_code}')
 def public_verify_id(request, id_code: str):
     """Public unauthenticated endpoint to verify registration number or public_id via QR code scan."""
-    user = User.objects.filter(registration_number__iexact=id_code).first()
+    clean_code = id_code.strip()
+    user = User.objects.filter(registration_number__iexact=clean_code).first()
     
     if not user:
         # Match by syncing registration numbers across existing active users
         for u in User.objects.all():
-            if sync_user_registration_number(u).lower() == id_code.lower():
+            if sync_user_registration_number(u).lower() == clean_code.lower():
                 user = u
                 break
 
+    # Parse index position if formatted like OASIS-MBR-000001 or OASIS-VOL-0001
+    if not user:
+        import re
+        digits = re.findall(r'\d+', clean_code)
+        if digits:
+            try:
+                target_idx = int(digits[-1])
+                if 'VOL' in clean_code.upper():
+                    vols = list(User.objects.filter(
+                        models.Q(volunteer_status=User.VolunteerStatus.APPROVED) | models.Q(user_type='volunteer') | models.Q(role='admin')
+                    ).order_by('created_at', 'id'))
+                    if 1 <= target_idx <= len(vols):
+                        user = vols[target_idx - 1]
+                else:
+                    mbrs = list(User.objects.filter(
+                        user_type='member'
+                    ).exclude(
+                        volunteer_status=User.VolunteerStatus.APPROVED
+                    ).exclude(
+                        role='admin'
+                    ).order_by('created_at', 'id'))
+                    if 1 <= target_idx <= len(mbrs):
+                        user = mbrs[target_idx - 1]
+            except Exception:
+                pass
+
     if not user:
         try:
-            uid = uuid.UUID(id_code)
+            uid = uuid.UUID(clean_code)
             user = User.objects.filter(public_id=uid).first()
         except ValueError:
             pass
 
     if not user:
-        user = User.objects.filter(registration_number__icontains=id_code).first()
+        user = User.objects.filter(registration_number__icontains=clean_code).first()
+
+    if not user and clean_code.isdigit():
+        user = User.objects.filter(id=int(clean_code)).first()
 
     if not user:
-        raise HttpError(404, "Registration Number or ID code not found.")
+        raise HttpError(404, f"Registration Number '{id_code}' was not found in the official Oasis database.")
 
     sync_user_registration_number(user)
     is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer' or user.role == 'admin'
@@ -1062,9 +1092,18 @@ def public_verify_id(request, id_code: str):
 @router.post('/upload-avatar', response=UserOut, auth=jwt_auth)
 def upload_avatar(request, file: UploadedFile = File(...)):
     """
-    Upload avatar image. Saves to media/avatars/ and updates user with self-contained Base64 Data URL.
+    Upload avatar image. Resizes image to crisp 300x300 and updates user.
     """
     import base64
+    from django.db import connection
+
+    # Ensure PostgreSQL avatar_url column is TEXT
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE users ALTER COLUMN avatar_url TYPE text;")
+    except Exception:
+        pass
+
     user = request.auth_user
 
     # Validate file size (max 5MB)
@@ -1072,16 +1111,26 @@ def upload_avatar(request, file: UploadedFile = File(...)):
         raise HttpError(400, 'File too large. Maximum size is 5MB.')
 
     file_bytes = file.read()
-    ext = file.name.split('.')[-1].lower() if '.' in file.name else 'jpg'
-    mime_type = 'image/png' if ext == 'png' else ('image/webp' if ext == 'webp' else ('image/gif' if ext == 'gif' else 'image/jpeg'))
+    mime_type = 'image/jpeg'
 
-    # Convert to Data URL for 100% reliable rendering across all devices & servers
+    # Compress / resize image using Pillow if available
+    try:
+        from PIL import Image as PILImage
+        import io
+        img = PILImage.open(io.BytesIO(file_bytes))
+        img.thumbnail((300, 300))
+        buffer = io.BytesIO()
+        img.convert('RGB').save(buffer, format='JPEG', quality=85)
+        file_bytes = buffer.getvalue()
+    except Exception as e:
+        print(f"[Pillow Resize Note] {e}")
+
     b64_str = base64.b64encode(file_bytes).decode('utf-8')
     data_url = f"data:{mime_type};base64,{b64_str}"
 
-    # Save file to media storage
+    # Also save to media storage
     try:
-        filename = f'avatars/{user.public_id}_{uuid.uuid4().hex[:8]}.{ext}'
+        filename = f'avatars/{user.public_id}_{uuid.uuid4().hex[:8]}.jpg'
         default_storage.save(filename, ContentFile(file_bytes))
     except Exception:
         pass

@@ -33,6 +33,8 @@ export function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const [freshAvatarUrl, setFreshAvatarUrl] = useState<string | null>(null);
+
   useEffect(() => {
     async function fetchFreshProfile() {
       if (!token) return;
@@ -43,6 +45,7 @@ export function UserMenu() {
         if (res.ok) {
           const prof = await res.json();
           if (prof.registration_number) setRegNum(prof.registration_number);
+          if (prof.avatar_url) setFreshAvatarUrl(prof.avatar_url);
         }
       } catch (err) {}
     }
@@ -80,19 +83,17 @@ export function UserMenu() {
   }
 
   const renderAvatar = () => {
+    const avatarSrc = freshAvatarUrl || session?.user?.image;
     const iconId = session?.user?.avatarIcon || 'default';
     const icon = getAvatarIcon(iconId);
 
-    if (session?.user?.image) {
+    if (avatarSrc) {
       return (
         <img
-          src={session.user.image}
-          alt={session.user.name || "User"}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            // Hide broken image on error and show fallback icon
-            e.currentTarget.style.display = 'none';
-          }}
+          src={avatarSrc}
+          alt={session?.user?.name || "User"}
+          className="w-full h-full object-cover rounded-full"
+          onError={() => setFreshAvatarUrl(null)}
         />
       );
     }

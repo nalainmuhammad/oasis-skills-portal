@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Phone, CreditCard, Calendar, School } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 
@@ -22,13 +22,9 @@ export function RegisterForm() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("male");
-  const [dob, setDob] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [cnicNumber, setCnicNumber] = useState("");
-  const [institutionName, setInstitutionName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   
   const [error, setError] = useState("");
@@ -37,6 +33,11 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -49,12 +50,7 @@ export function RegisterForm() {
           first_name: firstName,
           last_name: lastName,
           full_name: `${firstName} ${lastName}`.trim(),
-          gender,
-          date_of_birth: dob || null,
           email,
-          phone_number: phoneNumber,
-          cnic_number: cnicNumber,
-          institution_name: institutionName || null,
           password
         }),
       });
@@ -108,7 +104,7 @@ export function RegisterForm() {
           <div className="w-full border-t border-foreground/10"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-oasis-bgSecondary px-3 text-foreground/40 font-medium">or fill registration details below</span>
+          <span className="bg-oasis-bgSecondary px-3 text-foreground/40 font-medium">or register with email</span>
         </div>
       </div>
 
@@ -151,95 +147,19 @@ export function RegisterForm() {
           </div>
         </div>
 
-        {/* Gender & DOB */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Gender *</label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 px-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
-            >
-              <option value="male" className="bg-oasis-bgSecondary text-foreground">Male</option>
-              <option value="female" className="bg-oasis-bgSecondary text-foreground">Female</option>
-              <option value="other" className="bg-oasis-bgSecondary text-foreground">Other</option>
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Date of Birth *</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
-              <input
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                required
-                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Email & Phone */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Email Address *</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@example.com"
-                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Phone Number *</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-                placeholder="+92 300 1234567"
-                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* CNIC / B-Form Number & Institution */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">CNIC / B-Form Number *</label>
-            <div className="relative">
-              <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
-              <input
-                type="text"
-                value={cnicNumber}
-                onChange={(e) => setCnicNumber(e.target.value)}
-                required
-                placeholder="35202-1234567-1"
-                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Institution / School (Optional)</label>
-            <div className="relative">
-              <School className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
-              <input
-                type="text"
-                value={institutionName}
-                onChange={(e) => setInstitutionName(e.target.value)}
-                placeholder="University of Lahore"
-                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
-              />
-            </div>
+        {/* Email */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Email Address *</label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+              className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-4 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
+            />
           </div>
         </div>
 
@@ -266,6 +186,23 @@ export function RegisterForm() {
             </button>
           </div>
           <p className="text-xs text-foreground/40">Minimum 8 characters.</p>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70 uppercase tracking-wider">Confirm Password *</label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
+            <input
+              type={showPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              placeholder="••••••••"
+              className="w-full bg-foreground/5 border border-foreground/10 rounded-xl py-3 pl-10 pr-12 text-foreground focus:outline-none focus:border-oasis-emerald/50 transition-colors"
+            />
+          </div>
         </div>
 
         {/* Terms */}

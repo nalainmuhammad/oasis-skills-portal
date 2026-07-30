@@ -51,7 +51,8 @@ export default function SettingsPage() {
           setProfile(data);
           setFormData(data);
 
-          if (!data.is_educational_complete) setActiveStep(2);
+          if (!data.phone_number || !data.cnic_number) setActiveStep(1);
+          else if (!data.is_educational_complete) setActiveStep(2);
           else if (!data.is_address_complete) setActiveStep(3);
           else if (!data.is_emergency_social_complete) setActiveStep(4);
           else setActiveStep(1);

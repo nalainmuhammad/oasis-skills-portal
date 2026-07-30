@@ -953,11 +953,11 @@ def get_id_card(request):
         raise HttpError(400, f"Profile completion is currently {user.profile_completion_percentage}%. 100% completion is required to generate your ID Card.")
 
     is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer'
-    prefix = 'OASIS-VOL-2026' if is_approved_vol else 'OASIS-MBR-2026'
-    
-    # Strip any existing messy duplicated prefixes and extract the base user id suffix
-    num_suffix = f"{10000 + user.id}"
-    reg_num = f"{prefix}-{num_suffix}"
+    if is_approved_vol:
+        reg_num = f"OASIS-VOL-{user.id:04d}"
+    else:
+        reg_num = f"OASIS-MBR-{user.id:06d}"
+
     if user.registration_number != reg_num:
         user.registration_number = reg_num
         user.save(update_fields=['registration_number'])

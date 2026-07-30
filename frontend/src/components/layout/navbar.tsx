@@ -84,7 +84,7 @@ export function Navbar() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 bg-[#0b132b] bg-slate-950 z-[100] flex flex-col justify-between p-6 pt-20 overflow-y-auto">
+          <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[9999] bg-[#0b132b] flex flex-col justify-between p-6 pt-16 overflow-y-auto">
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-foreground/10 pb-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-oasis-emerald">

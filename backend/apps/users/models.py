@@ -178,8 +178,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         super().save(*args, **kwargs)
 
     @property
+    def is_personal_complete(self) -> bool:
+        return bool(self.full_name and self.phone_number and self.cnic_number)
+
+    @property
     def is_educational_complete(self) -> bool:
-        return bool(self.institution_name and self.degree_program and self.semester_class and self.graduation_year)
+        return bool(self.institution_name and self.degree_program)
 
     @property
     def is_address_complete(self) -> bool:
@@ -187,13 +191,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_emergency_social_complete(self) -> bool:
-        has_emergency = bool(self.guardian_name and self.guardian_relationship and self.guardian_contact)
-        has_social = bool(self.linkedin_url or self.github_url or self.portfolio_url)
+        has_emergency = bool(self.guardian_name and self.guardian_contact)
+        has_social = bool(self.linkedin_url or self.github_url or self.portfolio_url or self.instagram_url)
         return has_emergency and has_social
 
     @property
     def profile_completion_percentage(self) -> int:
-        score = 25  # Base 25% for successful registration with personal details
+        score = 0
+        if self.is_personal_complete:
+            score += 25
         if self.is_educational_complete:
             score += 25
         if self.is_address_complete:

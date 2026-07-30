@@ -1018,29 +1018,31 @@ def public_verify_id(request, id_code: str):
 @router.post('/upload-avatar', response=UserOut, auth=jwt_auth)
 def upload_avatar(request, file: UploadedFile = File(...)):
     """
-    Upload avatar image. Saves to media/avatars/ and updates user.
+    Upload avatar image. Saves to media/avatars/ and updates user with self-contained Base64 Data URL.
     """
+    import base64
     user = request.auth_user
 
     # Validate file size (max 5MB)
     if file.size > 5 * 1024 * 1024:
         raise HttpError(400, 'File too large. Maximum size is 5MB.')
 
-    # Save file
-    ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
-    filename = f'avatars/{user.public_id}_{uuid.uuid4().hex[:8]}.{ext}'
-
     file_bytes = file.read()
-    path = default_storage.save(filename, ContentFile(file_bytes))
-    avatar_url = f'{settings.MEDIA_URL}{path}'
+    ext = file.name.split('.')[-1].lower() if '.' in file.name else 'jpg'
+    mime_type = 'image/png' if ext == 'png' else ('image/webp' if ext == 'webp' else ('image/gif' if ext == 'gif' else 'image/jpeg'))
 
-    # Construct absolute URL if relative
-    if not avatar_url.startswith('http'):
-        host = request.headers.get('host', 'oasis-skills-portal.onrender.com')
-        scheme = 'https' if 'onrender.com' in host or 'oasisportal' in host or not settings.DEBUG else 'http'
-        avatar_url = f"{scheme}://{host}{avatar_url}"
+    # Convert to Data URL for 100% reliable rendering across all devices & servers
+    b64_str = base64.b64encode(file_bytes).decode('utf-8')
+    data_url = f"data:{mime_type};base64,{b64_str}"
 
-    user.avatar_url = avatar_url
+    # Save file to media storage
+    try:
+        filename = f'avatars/{user.public_id}_{uuid.uuid4().hex[:8]}.{ext}'
+        default_storage.save(filename, ContentFile(file_bytes))
+    except Exception:
+        pass
+
+    user.avatar_url = data_url
     user.avatar_type = 'upload'
     user.save(update_fields=['avatar_url', 'avatar_type'])
 

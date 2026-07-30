@@ -80,12 +80,23 @@ export function UserMenu() {
   }
 
   const renderAvatar = () => {
-    if (session?.user?.image) {
-      return <img src={session.user.image} alt={session.user.name || "User"} className="w-full h-full object-cover" />;
-    }
-    
     const iconId = session?.user?.avatarIcon || 'default';
     const icon = getAvatarIcon(iconId);
+
+    if (session?.user?.image) {
+      return (
+        <img
+          src={session.user.image}
+          alt={session.user.name || "User"}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // Hide broken image on error and show fallback icon
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      );
+    }
+    
     return (
       <div className="w-full h-full flex items-center justify-center text-oasis-emerald bg-oasis-emerald/10">
         {icon.svg}

@@ -1018,10 +1018,15 @@ def get_id_card(request):
 @router.get('/public-verify-id/{id_code}')
 def public_verify_id(request, id_code: str):
     """Public unauthenticated endpoint to verify registration number or public_id via QR code scan."""
-    user = None
-    if id_code.startswith('OASIS-') or 'VOL' in id_code or 'MBR' in id_code:
-        user = User.objects.filter(registration_number__iexact=id_code).first()
+    user = User.objects.filter(registration_number__iexact=id_code).first()
     
+    if not user:
+        # Match by syncing registration numbers across existing active users
+        for u in User.objects.all():
+            if sync_user_registration_number(u).lower() == id_code.lower():
+                user = u
+                break
+
     if not user:
         try:
             uid = uuid.UUID(id_code)
@@ -1035,16 +1040,21 @@ def public_verify_id(request, id_code: str):
     if not user:
         raise HttpError(404, "Registration Number or ID code not found.")
 
-    is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer'
+    sync_user_registration_number(user)
+    is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer' or user.role == 'admin'
 
     return {
         'full_name': user.full_name,
-        'registration_number': user.registration_number or id_code,
-        'position': user.position or ('Volunteer' if is_approved_vol else 'Member'),
+        'registration_number': user.registration_number,
+        'position': user.position or ('Verified Volunteer' if is_approved_vol else 'Official Member'),
         'user_type': user.user_type or 'member',
-        'institution_name': user.institution_name or 'Oasis Foundation',
+        'institution_name': user.institution_name or 'OASIS Foundation',
         'city': user.city or 'Pakistan',
+        'joining_date': user.created_at.date(),
         'volunteer_status': user.volunteer_status or 'none',
+        'avatar_url': user.avatar_url,
+        'avatar_icon': user.avatar_icon or 'default',
+        'profile_completion_percentage': user.profile_completion_percentage,
         'is_verified': True,
     }
 

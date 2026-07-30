@@ -131,7 +131,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     resume_url = models.URLField(max_length=2048, blank=True, null=True)
 
     # Avatar System
-    avatar_url = models.URLField(max_length=2048, blank=True, null=True)
+    avatar_url = models.TextField(blank=True, null=True)
     avatar_type = models.CharField(
         max_length=10, choices=AvatarType.choices,
         default=AvatarType.ICON

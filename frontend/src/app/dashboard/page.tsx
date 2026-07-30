@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     getMyEnrollments()
   ]);
 
-  const completion = profile?.profile_completion_percentage || 25;
+  const completion = profile?.profile_completion_percentage ?? 0;
   const isComplete = completion === 100;
   const activeCourses = enrollments.filter(e => e.status !== 'completed');
 

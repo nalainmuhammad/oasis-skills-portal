@@ -232,7 +232,7 @@ export default function SettingsPage() {
     );
   }
 
-  const completion = profile?.profile_completion_percentage || 25;
+  const completion = profile?.profile_completion_percentage ?? 0;
   const iconInfo = getAvatarIcon(profile?.avatar_icon || 'default');
 
   return (
@@ -372,7 +372,7 @@ export default function SettingsPage() {
                       activeStep === 1 ? "bg-oasis-emerald text-black shadow-md" : "bg-foreground/5 text-foreground/70"
                     }`}
                   >
-                    1. Personal (25%)
+                    1. Personal (+25%)
                   </button>
                   <button
                     onClick={() => setActiveStep(2)}
@@ -380,7 +380,7 @@ export default function SettingsPage() {
                       activeStep === 2 ? "bg-oasis-emerald text-black shadow-md" : "bg-foreground/5 text-foreground/70"
                     }`}
                   >
-                    2. Educational (50%)
+                    2. Educational (+25%)
                   </button>
                   <button
                     onClick={() => setActiveStep(3)}
@@ -388,7 +388,7 @@ export default function SettingsPage() {
                       activeStep === 3 ? "bg-oasis-emerald text-black shadow-md" : "bg-foreground/5 text-foreground/70"
                     }`}
                   >
-                    3. Address (75%)
+                    3. Address (+25%)
                   </button>
                   <button
                     onClick={() => setActiveStep(4)}
@@ -396,7 +396,7 @@ export default function SettingsPage() {
                       activeStep === 4 ? "bg-oasis-emerald text-black shadow-md" : "bg-foreground/5 text-foreground/70"
                     }`}
                   >
-                    4. Emergency/Social (100%)
+                    4. Emergency/Social (+25%)
                   </button>
                 </div>
 

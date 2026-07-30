@@ -376,7 +376,7 @@ class UserOut(Schema):
     email_verified: bool = False
     
     # Profile Completion % and status
-    profile_completion_percentage: int = 25
+    profile_completion_percentage: int = 0
     pending_sections: List[str] = []
     
     # 1. Educational Info

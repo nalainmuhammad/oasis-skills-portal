@@ -1022,35 +1022,23 @@ def upload_avatar(request, file: UploadedFile = File(...)):
     """
     user = request.auth_user
 
-    # Validate file type
-    allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-    if file.content_type not in allowed_types:
-        raise HttpError(400, 'Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.')
-
     # Validate file size (max 5MB)
     if file.size > 5 * 1024 * 1024:
         raise HttpError(400, 'File too large. Maximum size is 5MB.')
 
-    # Generate unique filename
+    # Save file
     ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
     filename = f'avatars/{user.public_id}_{uuid.uuid4().hex[:8]}.{ext}'
 
-    # Delete old uploaded avatar if exists
-    if user.avatar_type == 'upload' and user.avatar_url:
-        try:
-            old_path = user.avatar_url.replace(settings.MEDIA_URL, '')
-            if default_storage.exists(old_path):
-                default_storage.delete(old_path)
-        except Exception:
-            pass
-
-    # Save file
-    path = default_storage.save(filename, ContentFile(file.read()))
+    file_bytes = file.read()
+    path = default_storage.save(filename, ContentFile(file_bytes))
     avatar_url = f'{settings.MEDIA_URL}{path}'
 
-    # For development, construct full URL
-    if settings.DEBUG:
-        avatar_url = f'http://localhost:8000{avatar_url}'
+    # Construct absolute URL if relative
+    if not avatar_url.startswith('http'):
+        host = request.headers.get('host', 'oasis-skills-portal.onrender.com')
+        scheme = 'https' if 'onrender.com' in host or 'oasisportal' in host or not settings.DEBUG else 'http'
+        avatar_url = f"{scheme}://{host}{avatar_url}"
 
     user.avatar_url = avatar_url
     user.avatar_type = 'upload'

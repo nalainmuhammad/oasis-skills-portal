@@ -142,23 +142,57 @@ export default function SettingsPage() {
   const handleFileUploadAvatar = async (file: File) => {
     if (!session?.accessToken) return;
     try {
+      setIsSaving(true);
+      setMessage(null);
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
       const fd = new FormData();
       fd.append('file', file);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com'}/api/users/upload-avatar`, {
+      const res = await fetch(`${apiUrl}/api/auth/upload-avatar`, {
         method: 'POST',
         headers: { "Authorization": `Bearer ${session.accessToken}` },
         body: fd
       });
 
-      if (!res.ok) throw new Error("Failed to upload photo");
-      const data = await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        const uploadedUrl = data.avatar_url;
+        setProfile(prev => prev ? { ...prev, avatar_url: uploadedUrl, avatar_type: 'upload' } : null);
+        await updateSession({ image: uploadedUrl, avatarType: 'upload' });
+        setMessage({ type: 'success', text: "Profile photo uploaded successfully!" });
+        return;
+      }
 
-      setProfile(prev => prev ? { ...prev, avatar_url: data.photograph_url, avatar_type: 'url' } : null);
-      await updateSession({ image: data.photograph_url });
-      setMessage({ type: 'success', text: "Profile photo uploaded successfully!" });
-    } catch (err) {
-      setMessage({ type: 'error', text: "Failed to upload photo." });
+      // Fallback: Convert to Base64 Data URL
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Url = e.target?.result as string;
+        if (!base64Url) return;
+
+        const patchRes = await fetch(`${apiUrl}/api/auth/me`, {
+          method: 'PATCH',
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`
+          },
+          body: JSON.stringify({ avatar_url: base64Url, avatar_type: 'url' })
+        });
+
+        if (patchRes.ok) {
+          setProfile(prev => prev ? { ...prev, avatar_url: base64Url, avatar_type: 'url' } : null);
+          await updateSession({ image: base64Url, avatarType: 'url' });
+          setMessage({ type: 'success', text: "Profile photo saved successfully!" });
+        } else {
+          setMessage({ type: 'error', text: "Failed to save photo." });
+        }
+      };
+      reader.readAsDataURL(file);
+
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || "Failed to upload photo." });
+    } finally {
+      setIsSaving(false);
     }
   };
 

@@ -514,11 +514,46 @@ class IdCardOut(Schema):
 # ENDPOINTS
 # ─────────────────────────────────────────────
 
+def sync_user_registration_number(user) -> str:
+    """
+    Computes accurate, 1-based sequential registration number:
+    - Volunteer (approved or user_type=='volunteer'): OASIS-VOL-0001, OASIS-VOL-0002, ...
+    - Member: OASIS-MBR-000001, OASIS-MBR-000002, ...
+    """
+    is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer' or user.role == 'admin'
+    
+    if is_approved_vol:
+        vol_ids = list(User.objects.filter(
+            models.Q(volunteer_status=User.VolunteerStatus.APPROVED) | models.Q(user_type='volunteer') | models.Q(role='admin')
+        ).order_by('created_at', 'id').values_list('id', flat=True))
+        idx = vol_ids.index(user.id) + 1 if user.id in vol_ids else (len(vol_ids) + 1)
+        reg_num = f"OASIS-VOL-{idx:04d}"
+    else:
+        mbr_ids = list(User.objects.filter(
+            user_type='member'
+        ).exclude(
+            volunteer_status=User.VolunteerStatus.APPROVED
+        ).exclude(
+            role='admin'
+        ).order_by('created_at', 'id').values_list('id', flat=True))
+        idx = mbr_ids.index(user.id) + 1 if user.id in mbr_ids else (len(mbr_ids) + 1)
+        reg_num = f"OASIS-MBR-{idx:06d}"
+
+    if user.registration_number != reg_num:
+        user.registration_number = reg_num
+        user.save(update_fields=['registration_number'])
+
+    return reg_num
+
+
 def generate_registration_number(user_type: str = 'volunteer') -> str:
     prefix = 'OASIS-VOL' if user_type == 'volunteer' else 'OASIS-MBR'
-    year = datetime.now().year
-    count = User.objects.count() + 10001
-    return f"{prefix}-{year}-{count}"
+    if user_type == 'volunteer':
+        count = User.objects.filter(models.Q(volunteer_status=User.VolunteerStatus.APPROVED) | models.Q(user_type='volunteer')).count() + 1
+        return f"{prefix}-{count:04d}"
+    else:
+        count = User.objects.filter(user_type='member').count() + 1
+        return f"{prefix}-{count:06d}"
 
 
 @router.post('/register', response={201: RegisterOut})
@@ -809,7 +844,9 @@ def send_verification_otp(request):
 @router.get('/me', response=UserOut, auth=jwt_auth)
 def get_profile(request):
     """Current user profile from JWT sub claim."""
-    return request.auth_user
+    user = request.auth_user
+    sync_user_registration_number(user)
+    return user
 
 
 @router.patch('/me', response=UserOut, auth=jwt_auth)
@@ -952,11 +989,8 @@ def get_id_card(request):
     if user.profile_completion_percentage < 100:
         raise HttpError(400, f"Profile completion is currently {user.profile_completion_percentage}%. 100% completion is required to generate your ID Card.")
 
+    reg_num = sync_user_registration_number(user)
     is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer'
-    if is_approved_vol:
-        reg_num = f"OASIS-VOL-{user.id:04d}"
-    else:
-        reg_num = f"OASIS-MBR-{user.id:06d}"
 
     if user.registration_number != reg_num:
         user.registration_number = reg_num

@@ -612,7 +612,28 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-bold uppercase text-foreground/70">LinkedIn Profile URL</label>
+                        <label className="text-xs font-bold uppercase text-foreground/70">Guardian Relationship</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Father / Mother / Brother"
+                          value={formData.guardian_relationship || ''}
+                          onChange={e => handleChange('guardian_relationship', e.target.value)}
+                          className="w-full mt-1 bg-foreground/5 border border-foreground/10 rounded-xl p-3 text-xs text-foreground focus:outline-none focus:border-oasis-emerald/50"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold uppercase text-foreground/70">Instagram Handle / Profile URL *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="https://instagram.com/username or @username"
+                          value={formData.instagram_url || ''}
+                          onChange={e => handleChange('instagram_url', e.target.value)}
+                          className="w-full mt-1 bg-foreground/5 border border-foreground/10 rounded-xl p-3 text-xs text-foreground focus:outline-none focus:border-oasis-emerald/50"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold uppercase text-foreground/70">LinkedIn Profile URL (Optional)</label>
                         <input
                           type="url"
                           placeholder="https://linkedin.com/in/username"
@@ -622,12 +643,32 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-bold uppercase text-foreground/70">GitHub / Portfolio URL</label>
+                        <label className="text-xs font-bold uppercase text-foreground/70">GitHub Profile URL (Optional)</label>
                         <input
                           type="url"
                           placeholder="https://github.com/username"
                           value={formData.github_url || ''}
                           onChange={e => handleChange('github_url', e.target.value)}
+                          className="w-full mt-1 bg-foreground/5 border border-foreground/10 rounded-xl p-3 text-xs text-foreground focus:outline-none focus:border-oasis-emerald/50"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold uppercase text-foreground/70">Portfolio / Personal Website URL (Optional)</label>
+                        <input
+                          type="url"
+                          placeholder="https://yourportfolio.com"
+                          value={formData.portfolio_url || ''}
+                          onChange={e => handleChange('portfolio_url', e.target.value)}
+                          className="w-full mt-1 bg-foreground/5 border border-foreground/10 rounded-xl p-3 text-xs text-foreground focus:outline-none focus:border-oasis-emerald/50"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold uppercase text-foreground/70">Resume / CV Link (Optional)</label>
+                        <input
+                          type="url"
+                          placeholder="https://drive.google.com/your-resume-link"
+                          value={formData.resume_url || ''}
+                          onChange={e => handleChange('resume_url', e.target.value)}
                           className="w-full mt-1 bg-foreground/5 border border-foreground/10 rounded-xl p-3 text-xs text-foreground focus:outline-none focus:border-oasis-emerald/50"
                         />
                       </div>

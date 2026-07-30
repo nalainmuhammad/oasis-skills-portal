@@ -3,12 +3,11 @@ import { ShieldCheck, CheckCircle2, AlertCircle, School, MapPin } from "lucide-r
 async function getVerificationData(regOrUuid: string) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oasis-skills-portal.onrender.com';
-    const res = await fetch(`${apiUrl}/api/admin/volunteers?search=${encodeURIComponent(regOrUuid)}`, {
+    const res = await fetch(`${apiUrl}/api/users/public-verify-id/${encodeURIComponent(regOrUuid)}`, {
       cache: 'no-store'
     });
     if (!res.ok) return null;
-    const items = await res.json();
-    return items.find((u: any) => u.registration_number === regOrUuid || u.public_id === regOrUuid) || items[0] || null;
+    return await res.json();
   } catch (e) {
     return null;
   }

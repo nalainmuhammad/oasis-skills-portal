@@ -981,6 +981,40 @@ def get_id_card(request):
     }
 
 
+@router.get('/public-verify-id/{id_code}')
+def public_verify_id(request, id_code: str):
+    """Public unauthenticated endpoint to verify registration number or public_id via QR code scan."""
+    user = None
+    if id_code.startswith('OASIS-') or 'VOL' in id_code or 'MBR' in id_code:
+        user = User.objects.filter(registration_number__iexact=id_code).first()
+    
+    if not user:
+        try:
+            uid = uuid.UUID(id_code)
+            user = User.objects.filter(public_id=uid).first()
+        except ValueError:
+            pass
+
+    if not user:
+        user = User.objects.filter(registration_number__icontains=id_code).first()
+
+    if not user:
+        raise HttpError(404, "Registration Number or ID code not found.")
+
+    is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer'
+
+    return {
+        'full_name': user.full_name,
+        'registration_number': user.registration_number or id_code,
+        'position': user.position or ('Volunteer' if is_approved_vol else 'Member'),
+        'user_type': user.user_type or 'member',
+        'institution_name': user.institution_name or 'Oasis Foundation',
+        'city': user.city or 'Pakistan',
+        'volunteer_status': user.volunteer_status or 'none',
+        'is_verified': True,
+    }
+
+
 @router.post('/upload-avatar', response=UserOut, auth=jwt_auth)
 def upload_avatar(request, file: UploadedFile = File(...)):
     """

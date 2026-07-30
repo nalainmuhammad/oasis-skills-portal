@@ -32,44 +32,44 @@ export default async function DashboardPage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 rounded-full bg-oasis-emerald/10 border border-oasis-emerald/20 text-oasis-emerald text-xs font-bold uppercase tracking-wider">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="px-2.5 py-1 rounded-full bg-oasis-emerald/10 border border-oasis-emerald/20 text-oasis-emerald text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">
                   {profile?.user_type === 'volunteer' || profile?.volunteer_status === 'approved' ? 'Oasis Verified Volunteer' : 'Oasis Member'}
                 </span>
                 {profile?.registration_number && (
-                  <span className="px-3 py-1 rounded-full bg-foreground/5 border border-foreground/10 text-foreground/70 font-mono text-xs font-bold">
+                  <span className="px-2.5 py-1 rounded-full bg-foreground/5 border border-foreground/10 text-foreground/70 font-mono text-[10px] sm:text-xs font-bold whitespace-nowrap">
                     {profile.registration_number}
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-foreground leading-tight">
                 Welcome back, {session?.user?.name || 'Member'}!
               </h1>
-              <p className="text-oasis-muted text-sm mt-1">
+              <p className="text-oasis-muted text-xs sm:text-sm mt-1">
                 Your personal hub for volunteer opportunities, earned certificates, and learning courses.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
               <Link
                 href="/dashboard/settings"
-                className="px-5 py-2.5 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 text-foreground text-sm font-semibold transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 text-foreground text-xs sm:text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"
               >
-                <Settings size={16} className="text-blue-400" /> Account Settings
+                <Settings size={15} className="text-blue-400" /> Account Settings
               </Link>
               {isComplete ? (
                 <Link
                   href="/dashboard/id-card"
-                  className="px-5 py-2.5 rounded-xl bg-oasis-emerald hover:bg-oasis-emeraldLight text-black text-sm font-semibold transition-all shadow-lg shadow-oasis-emerald/20 flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-oasis-emerald hover:bg-oasis-emeraldLight text-black text-xs sm:text-sm font-semibold transition-all shadow-lg shadow-oasis-emerald/20 flex items-center gap-2 shrink-0"
                 >
-                  <CreditCard size={16} /> Digital ID Card
+                  <CreditCard size={15} /> Digital ID Card
                 </Link>
               ) : (
                 <Link
                   href="/dashboard/settings"
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold transition-all flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0"
                 >
-                  <AlertCircle size={16} /> Complete Settings ({completion}%)
+                  <AlertCircle size={15} /> Complete Settings ({completion}%)
                 </Link>
               )}
             </div>

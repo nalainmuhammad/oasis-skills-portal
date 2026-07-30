@@ -173,7 +173,7 @@ export function UserMenu() {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-64 glass-card rounded-2xl border border-foreground/10 shadow-2xl py-2 z-50">
+          <div className="absolute right-0 mt-2 w-72 bg-[#0d1527] border border-foreground/20 shadow-[0_20px_50px_rgba(0,0,0,0.95)] rounded-2xl py-3 z-[100] opacity-100">
             <div className="px-4 py-3 border-b border-foreground/10 mb-2">
               <p className="text-sm font-bold text-foreground truncate">{session.user?.name}</p>
               <p className="text-xs text-foreground/50 truncate mb-1">{session.user?.email}</p>

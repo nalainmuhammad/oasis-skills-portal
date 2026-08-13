@@ -159,7 +159,8 @@ export default function SettingsPage() {
         const data = await res.json();
         const uploadedUrl = data.avatar_url;
         setProfile(prev => prev ? { ...prev, avatar_url: uploadedUrl, avatar_type: 'upload' } : null);
-        await updateSession({ image: uploadedUrl, avatarType: 'upload' });
+        const safeUrl = (uploadedUrl && !uploadedUrl.startsWith('data:') && uploadedUrl.length < 500) ? uploadedUrl : undefined;
+        await updateSession({ image: safeUrl, avatarType: 'upload' });
         setMessage({ type: 'success', text: "Profile photo uploaded successfully!" });
         return;
       }
@@ -181,7 +182,7 @@ export default function SettingsPage() {
 
         if (patchRes.ok) {
           setProfile(prev => prev ? { ...prev, avatar_url: base64Url, avatar_type: 'url' } : null);
-          await updateSession({ image: base64Url, avatarType: 'url' });
+          await updateSession({ avatarType: 'url' });
           setMessage({ type: 'success', text: "Profile photo saved successfully!" });
         } else {
           setMessage({ type: 'error', text: "Failed to save photo." });

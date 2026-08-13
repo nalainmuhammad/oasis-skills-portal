@@ -4,6 +4,12 @@ import GoogleProvider from "next-auth/providers/google";
 
 process.env.AUTH_TRUST_HOST = "true";
 
+function safeImage(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
+  if (url.startsWith('data:') || url.length > 500) return null;
+  return url;
+}
+
 export const {
   handlers,
   signIn,
@@ -57,7 +63,7 @@ export const {
                 id: userProfile.public_id,
                 email: userProfile.email,
                 name: userProfile.full_name,
-                image: userProfile.avatar_url || null,
+                image: safeImage(userProfile.avatar_url),
                 role: userProfile.role,
                 emailVerified: userProfile.email_verified,
                 avatarType: userProfile.avatar_type,
@@ -105,7 +111,7 @@ export const {
 
               if (profileRes.ok) {
                 const profile = await profileRes.json();
-                const finalImage = profile.avatar_url || user.image;
+                const finalImage = safeImage(profile.avatar_url) || safeImage(user.image);
                 (user as any).role = profile.role;
                 (user as any).id = profile.public_id;
                 (user as any).emailVerified = profile.email_verified;
@@ -147,12 +153,12 @@ export const {
         token.registrationNumber = (user as any).registrationNumber;
         token.position = (user as any).position;
         token.profileCompletionPercentage = (user as any).profileCompletionPercentage;
-        token.image = user.image;
+        token.image = safeImage(user.image);
       }
       // Handle session updates
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name;
-        if (session.image) token.image = session.image;
+        if (session.image) token.image = safeImage(session.image);
         if (session.avatarType) token.avatarType = session.avatarType;
         if (session.avatarIcon) token.avatarIcon = session.avatarIcon;
         if (session.profileCompletionPercentage !== undefined) token.profileCompletionPercentage = session.profileCompletionPercentage;
@@ -160,6 +166,12 @@ export const {
         // @ts-ignore
         if (session.emailVerified !== undefined) (token as any).emailVerified = session.emailVerified;
       }
+
+      // Safeguard against oversized image strings in token
+      if (token.image && typeof token.image === 'string' && (token.image.startsWith('data:') || token.image.length > 500)) {
+        token.image = null;
+      }
+
       return token;
     },
     async redirect({ url, baseUrl }) {
@@ -177,7 +189,7 @@ export const {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
-        session.user.image = token.image as string;
+        session.user.image = safeImage(token.image as string) || "";
         // @ts-ignore
         session.user.emailVerified = token.emailVerified as boolean;
         session.user.avatarType = token.avatarType as string;

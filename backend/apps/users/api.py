@@ -1124,17 +1124,21 @@ def upload_avatar(request, file: UploadedFile = File(...)):
     except Exception as e:
         print(f"[Pillow Resize Note] {e}")
 
-    b64_str = base64.b64encode(file_bytes).decode('utf-8')
-    data_url = f"data:{mime_type};base64,{b64_str}"
-
-    # Also save to media storage
+    # Save to media storage
+    avatar_url_result = None
     try:
         filename = f'avatars/{user.public_id}_{uuid.uuid4().hex[:8]}.jpg'
-        default_storage.save(filename, ContentFile(file_bytes))
-    except Exception:
-        pass
+        saved_name = default_storage.save(filename, ContentFile(file_bytes))
+        api_base = getattr(settings, 'NEXT_PUBLIC_API_URL', 'https://oasis-skills-portal.onrender.com').rstrip('/')
+        avatar_url_result = f"{api_base}/media/{saved_name}"
+    except Exception as e:
+        print(f"[Storage Warning] {e}")
 
-    user.avatar_url = data_url
+    if not avatar_url_result:
+        b64_str = base64.b64encode(file_bytes).decode('utf-8')
+        avatar_url_result = f"data:{mime_type};base64,{b64_str}"
+
+    user.avatar_url = avatar_url_result
     user.avatar_type = 'upload'
     user.save(update_fields=['avatar_url', 'avatar_type'])
 

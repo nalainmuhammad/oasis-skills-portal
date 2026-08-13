@@ -184,17 +184,15 @@ export default async function VerifyCertificatePage({ params }: { params: Promis
             </div>
             
             {/* PDF Download Section */}
-            {certificate.pdf_url && (
-              <div className="bg-oasis-gold/5 p-6 border-t border-oasis-gold/10 text-center flex justify-center">
-                <PdfDownloader 
-                  verificationUuid={certificate.verification_uuid}
-                  recipientName={certificate.recipient_name_snapshot}
-                  courseTitle={certificate.course_title_snapshot}
-                  issuedAt={certificate.issued_at}
-                  hostUrl={process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}
-                />
-              </div>
-            )}
+            <div className="bg-oasis-gold/5 p-6 border-t border-oasis-gold/10 text-center flex justify-center">
+              <PdfDownloader 
+                verificationUuid={certificate.verification_uuid}
+                recipientName={certificate.recipient_name_snapshot}
+                courseTitle={certificate.course_title_snapshot}
+                issuedAt={certificate.issued_at}
+                hostUrl={process.env.NEXT_PUBLIC_APP_URL || 'https://oasisportal.tech'}
+              />
+            </div>
           </div>
 
           {/* Verify Another Credential Footer */}

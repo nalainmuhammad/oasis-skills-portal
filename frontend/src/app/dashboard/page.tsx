@@ -134,12 +134,26 @@ export default async function DashboardPage() {
           </div>
 
           {/* SECTION 2: MY CERTIFICATES */}
-          {certificates.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-display font-bold text-foreground mb-6 flex items-center gap-2">
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
                 <Award className="text-oasis-gold" /> My Earned Certificates ({certificates.length})
               </h2>
+              <Link href="/certificates" className="text-oasis-gold hover:underline text-sm font-medium flex items-center gap-1">
+                View All Credentials <ArrowRight size={14} />
+              </Link>
+            </div>
 
+            {certificates.length === 0 ? (
+              <div className="text-center py-12 bg-foreground/5 rounded-2xl border border-foreground/10 p-6">
+                <Trophy size={44} className="text-oasis-gold/40 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-foreground mb-1">No Earned Certificates Yet</h3>
+                <p className="text-oasis-muted text-sm mb-4">Complete learning courses or volunteer programs to earn official verified certificates.</p>
+                <Link href="/courses" className="inline-flex px-5 py-2.5 rounded-xl bg-oasis-gold text-black font-semibold text-sm hover:bg-amber-400 transition-colors">
+                  Start Coursework
+                </Link>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {certificates.map(cert => (
                   <div key={cert.verification_uuid} className="glass-card rounded-2xl p-5 border border-oasis-gold/30 flex flex-col justify-between">
@@ -166,8 +180,8 @@ export default async function DashboardPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* SECTION 3: COURSES (INTEGRATED LEARNING PORTAL) */}
           <div>

@@ -984,13 +984,11 @@ def apply_for_volunteer_verification(request):
 
 @router.get('/id-card', response=IdCardOut, auth=jwt_auth)
 def get_id_card(request):
-    """Return digital ID card metadata once profile is 100% completed."""
+    """Return digital ID card metadata for active members and volunteers."""
     user = request.auth_user
-    if user.profile_completion_percentage < 100:
-        raise HttpError(400, f"Profile completion is currently {user.profile_completion_percentage}%. 100% completion is required to generate your ID Card.")
 
     reg_num = sync_user_registration_number(user)
-    is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer'
+    is_approved_vol = user.volunteer_status == User.VolunteerStatus.APPROVED or user.user_type == 'volunteer' or user.role == 'admin'
 
     if user.registration_number != reg_num:
         user.registration_number = reg_num

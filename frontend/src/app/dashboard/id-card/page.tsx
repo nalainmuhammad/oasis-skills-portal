@@ -61,8 +61,8 @@ export default function IdCardPage() {
           </div>
           <h2 className="text-2xl font-bold text-foreground">ID Card Unavailable</h2>
           <p className="text-oasis-muted text-sm">{error || "You must complete 100% of your profile to access your official ID Card."}</p>
-          <Button onClick={() => window.location.href = '/dashboard/profile'} className="bg-oasis-emerald text-black font-bold rounded-xl px-6 py-2.5">
-            Complete Profile Now
+          <Button onClick={() => window.location.href = '/dashboard/settings'} className="bg-oasis-emerald text-black font-bold rounded-xl px-6 py-2.5">
+            Complete Settings Now
           </Button>
         </div>
       </div>

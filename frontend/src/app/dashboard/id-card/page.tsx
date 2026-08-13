@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { IdCardData } from "@/types";
-import { getIdCard } from "@/lib/api/profile";
+import { getIdCard, getProfile } from "@/lib/api/profile";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, HeartHandshake, Printer, AlertCircle, CheckCircle2, Clock, UserCheck } from "lucide-react";
 
@@ -25,6 +25,30 @@ export default function IdCardPage() {
         const data = await getIdCard(session.accessToken);
         setIdCard(data);
       } catch (err: any) {
+        try {
+          const profile = await getProfile(session.accessToken);
+          if (profile) {
+            const regNum = profile.registration_number || `OASIS-${profile.user_type === 'volunteer' ? 'VOL' : 'MBR'}-0001`;
+            const fallbackCard: IdCardData = {
+              full_name: profile.full_name,
+              volunteer_id: regNum,
+              registration_number: regNum,
+              position: profile.position || (profile.volunteer_status === 'approved' ? 'Volunteer' : 'Member'),
+              foundation_name: 'OASIS Foundation',
+              joining_date: profile.created_at ? profile.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+              photograph_url: profile.avatar_url,
+              qr_verification_code: regNum,
+              verification_url: `https://oasisportal.tech/verify-id/${regNum}`,
+              profile_completion_percentage: profile.profile_completion_percentage,
+              volunteer_status: profile.volunteer_status,
+              user_type: profile.user_type,
+            };
+            setIdCard(fallbackCard);
+            return;
+          }
+        } catch (_) {
+          // ignore fallback error
+        }
         setError(err.message || "Failed to load ID card");
       } finally {
         setIsLoading(false);
@@ -32,7 +56,9 @@ export default function IdCardPage() {
     }
 
     if (status === "authenticated") {
-      loadCard();
+      if (session?.accessToken) {
+        loadCard();
+      }
     } else if (status === "unauthenticated") {
       setIsLoading(false);
       setError("Please sign in to access your Digital ID Card");

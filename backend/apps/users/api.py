@@ -25,6 +25,7 @@ from typing import Optional, List
 import dns.resolver
 import jwt
 from django.conf import settings
+from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.cache import cache
@@ -1003,7 +1004,7 @@ def get_id_card(request):
         'registration_number': reg_num,
         'position': user.position or ('Volunteer' if is_approved_vol else 'Member'),
         'foundation_name': 'OASIS Foundation',
-        'joining_date': user.created_at.date(),
+        'joining_date': user.created_at.date() if user.created_at else date.today(),
         'photograph_url': user.avatar_url,
         'qr_verification_code': qr_code,
         'verification_url': ver_url,

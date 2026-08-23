@@ -14,8 +14,9 @@ async function getVerificationData(regOrUuid: string) {
   }
 }
 
-export default async function VerifyIdPage({ params }: { params: { id: string } }) {
-  const data = await getVerificationData(params.id);
+export default async function VerifyIdPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const data = await getVerificationData(id);
   const isApprovedVolunteer = data?.volunteer_status === 'approved' || data?.user_type === 'volunteer' || data?.registration_number?.includes('VOL');
 
   return (

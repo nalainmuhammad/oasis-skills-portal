@@ -125,7 +125,7 @@ export default async function VerifyCertificatePage({ params }: { params: Promis
               </p>
 
               <h3 className="text-2xl md:text-4xl font-display font-bold text-oasis-gold mb-6 max-w-2xl mx-auto leading-snug">
-                {certificate.course_title_snapshot}
+                {certificate.course_title_snapshot || certificate.title_snapshot || 'Course Certificate'}
               </h3>
 
               {/* Metadata Pills */}
@@ -176,7 +176,7 @@ export default async function VerifyCertificatePage({ params }: { params: Promis
               <div className="mt-8">
                 <ShareActions 
                   recipientName={certificate.recipient_name_snapshot}
-                  courseTitle={certificate.course_title_snapshot}
+                  courseTitle={certificate.course_title_snapshot || certificate.title_snapshot || 'Course Certificate'}
                   verificationUuid={certificate.verification_uuid}
                 />
               </div>
@@ -188,7 +188,7 @@ export default async function VerifyCertificatePage({ params }: { params: Promis
               <PdfDownloader 
                 verificationUuid={certificate.verification_uuid}
                 recipientName={certificate.recipient_name_snapshot}
-                courseTitle={certificate.course_title_snapshot}
+                courseTitle={certificate.course_title_snapshot || certificate.title_snapshot || 'Course Certificate'}
                 issuedAt={certificate.issued_at}
                 hostUrl={process.env.NEXT_PUBLIC_APP_URL || 'https://oasisportal.tech'}
               />

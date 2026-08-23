@@ -45,6 +45,8 @@ export function PdfDownloader({
         year: 'numeric' 
       });
 
+      const displayCourseTitle = courseTitle && courseTitle !== 'undefined' ? courseTitle : 'Course Certificate';
+
       // Certificate HTML
       container.innerHTML = `
         <div id="cert-to-print" style="
@@ -81,7 +83,7 @@ export function PdfDownloader({
                 </h2>
                 
                 <div style="font-size: 16px; color: #8b949e; margin-top: 25px; margin-bottom: 10px;">For successfully completing the course</div>
-                <h3 style="font-size: 30px; font-weight: 600; color: #00d47e; margin: 0;">${courseTitle}</h3>
+                <h3 style="font-size: 30px; font-weight: 600; color: #00d47e; margin: 0;">${displayCourseTitle}</h3>
             </div>
 
             <div style="position: absolute; bottom: 60px; left: 80px; right: 80px; display: flex; justify-content: space-between; align-items: flex-end;">
@@ -142,7 +144,7 @@ export function PdfDownloader({
       pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
       pdf.link(imgX, imgY, imgWidth * ratio, imgHeight * ratio, { url: `${hostUrl}/verify/${verificationUuid}` });
 
-      const cleanFileName = (courseTitle || 'Certificate').replace(/[^a-zA-Z0-9]/g, '_');
+      const cleanFileName = (displayCourseTitle || 'Certificate').replace(/[^a-zA-Z0-9]/g, '_');
       pdf.save(`Oasis_Certificate_${cleanFileName}.pdf`);
     } catch (error: any) {
       console.error("PDF generation failed:", error);

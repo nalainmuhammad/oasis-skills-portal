@@ -24,6 +24,7 @@ class CertificateOut(Schema):
     verification_uuid: uuid.UUID
     certificate_number: Optional[str] = None
     title_snapshot: str
+    course_title_snapshot: Optional[str] = None
     recipient_name_snapshot: str
     role_snapshot: Optional[str] = None
     cert_type: str
@@ -37,6 +38,7 @@ class CertificateVerifyOut(Schema):
     verification_uuid: uuid.UUID
     certificate_number: Optional[str] = None
     title_snapshot: str
+    course_title_snapshot: Optional[str] = None
     recipient_name_snapshot: str
     role_snapshot: Optional[str] = None
     cert_type: str
@@ -97,6 +99,7 @@ def my_certificates(request):
             'verification_uuid': c.verification_uuid,
             'certificate_number': c.certificate_number or f"CERT-{c.id}",
             'title_snapshot': c.title_snapshot,
+            'course_title_snapshot': c.title_snapshot,
             'recipient_name_snapshot': c.recipient_name_snapshot,
             'role_snapshot': c.role_snapshot,
             'cert_type': c.cert_type,
@@ -130,6 +133,7 @@ def verify_certificate(request, cert_uuid: str):
         'verification_uuid': cert_obj.verification_uuid,
         'certificate_number': cert_obj.certificate_number or f"CERT-{cert_obj.id}",
         'title_snapshot': cert_obj.title_snapshot,
+        'course_title_snapshot': cert_obj.title_snapshot,
         'recipient_name_snapshot': cert_obj.recipient_name_snapshot,
         'role_snapshot': cert_obj.role_snapshot,
         'cert_type': cert_obj.cert_type,

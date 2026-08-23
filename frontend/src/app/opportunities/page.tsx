@@ -232,35 +232,20 @@ export default function OpportunitiesPage() {
               </div>
             </div>
 
-            {/* Check Profile Completion & Volunteer Verification Status */}
+            {/* Check Profile Completion */}
             {userCompletion < 100 ? (
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-3">
                 <div className="flex items-center gap-2 font-bold text-amber-400 text-sm">
                   <AlertCircle size={18} /> 100% Profile Completion Required
                 </div>
                 <p>
-                  Only volunteers with 100% completed profiles can apply for activities. Your profile is currently <strong>{userCompletion}%</strong> complete.
+                  Only members or volunteers with 100% completed profiles can apply for activities. Your profile is currently <strong>{userCompletion}%</strong> complete.
                 </p>
                 <Link
-                  href="/dashboard/profile"
+                  href="/dashboard/settings"
                   className="inline-block px-4 py-2 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-colors"
                 >
                   Complete Profile Now
-                </Link>
-              </div>
-            ) : volunteerStatus !== 'approved' ? (
-              <div className="p-4 rounded-2xl bg-oasis-emerald/10 border border-oasis-emerald/30 text-oasis-emerald text-xs space-y-3">
-                <div className="flex items-center gap-2 font-bold text-oasis-emerald text-sm">
-                  <Sparkles size={18} /> Verified Volunteer Status Required
-                </div>
-                <p>
-                  Your profile is 100% complete! To apply for specific volunteer opportunities, please submit your <strong>Volunteer Verification Application</strong> for admin review on your profile dashboard.
-                </p>
-                <Link
-                  href="/dashboard/profile"
-                  className="inline-block px-4 py-2 bg-oasis-emerald text-black font-bold rounded-xl hover:bg-oasis-emeraldLight transition-colors"
-                >
-                  Apply for Verification on Profile
                 </Link>
               </div>
             ) : (

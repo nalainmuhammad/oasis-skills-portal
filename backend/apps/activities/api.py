@@ -4,9 +4,11 @@ from typing import List, Optional
 from ninja import Router, Schema
 from ninja.errors import HttpError
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 from apps.users.api import jwt_auth
 from .models import Activity, ActivityApplication
 
+User = get_user_model()
 router = Router()
 
 
@@ -134,6 +136,7 @@ def apply_activity(request, public_id: uuid.UUID, data: ApplyIn):
     """
     Apply for an activity. Strictly requires 100% profile completion!
     """
+    user = request.auth_user
     is_eligible = (
         user.volunteer_status == User.VolunteerStatus.APPROVED or 
         user.user_type == 'volunteer' or 

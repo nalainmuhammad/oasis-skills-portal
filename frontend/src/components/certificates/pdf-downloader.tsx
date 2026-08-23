@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -19,26 +19,34 @@ export function PdfDownloader({
   hostUrl: string;
 }) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleDownload = async () => {
     setIsDownloading(true);
+    setErrorMsg(null);
+    
+    let container: HTMLDivElement | null = null;
     
     try {
-      // 1. Create an off-screen container for the certificate
-      const container = document.createElement("div");
+      // 1. Create off-screen rendering container with layout dimensions
+      container = document.createElement("div");
       container.style.position = "fixed";
-      container.style.top = "-9999px";
-      container.style.left = "-9999px";
+      container.style.left = "0";
+      container.style.top = "0";
+      container.style.width = "1000px";
+      container.style.height = "700px";
+      container.style.zIndex = "-9999";
+      container.style.opacity = "0.01";
+      container.style.pointerEvents = "none";
       
-      // Load fonts manually for html2canvas
-      const style = document.createElement('style');
-      style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-      `;
-      container.appendChild(style);
+      const formattedDate = new Date(issuedAt).toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
 
-      // Certificate HTML (matching the exact backend design)
-      const certHtml = `
+      // Certificate HTML
+      container.innerHTML = `
         <div id="cert-to-print" style="
             width: 1000px;
             height: 700px;
@@ -49,7 +57,7 @@ export function PdfDownloader({
             box-sizing: border-box;
             text-align: center;
             color: #e6edf3;
-            font-family: 'Inter', sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
         ">
             <!-- Corners -->
@@ -59,69 +67,69 @@ export function PdfDownloader({
             <div style="position: absolute; width: 80px; height: 80px; border: 4px solid #ffc641; opacity: 0.8; bottom: 20px; right: 20px; border-left: none; border-top: none;"></div>
 
             <div style="margin-top: 30px;">
-                <div style="font-family: 'Cinzel', serif; font-size: 32px; color: #00d47e; font-weight: 700; letter-spacing: 2px; margin-bottom: 20px;">
+                <div style="font-size: 32px; color: #00d47e; font-weight: 700; letter-spacing: 2px; margin-bottom: 20px;">
                     OASIS <span style="color: #ffc641;">FOUNDATION</span>
                 </div>
-                <h1 style="font-family: 'Cinzel', serif; font-size: 56px; color: #ffc641; margin: 0; letter-spacing: 4px; text-transform: uppercase;">Certificate</h1>
+                <h1 style="font-size: 56px; color: #ffc641; margin: 0; letter-spacing: 4px; text-transform: uppercase; font-weight: 800;">Certificate</h1>
                 <div style="font-size: 18px; color: #8b949e; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px;">Of Achievement</div>
             </div>
 
-            <div style="margin-top: 60px;">
+            <div style="margin-top: 50px;">
                 <div style="font-size: 16px; color: #8b949e; margin-bottom: 10px;">This is proudly presented to</div>
-                <h2 style="font-family: 'Cinzel', serif; font-size: 48px; color: #e6edf3; margin: 0; border-bottom: 1px solid rgba(255, 198, 65, 0.5); display: inline-block; padding: 0 40px 10px 40px;">
+                <h2 style="font-size: 44px; color: #e6edf3; margin: 0; border-bottom: 2px solid rgba(255, 198, 65, 0.5); display: inline-block; padding: 0 40px 10px 40px; font-weight: 700;">
                     ${recipientName}
                 </h2>
                 
-                <div style="font-size: 16px; color: #8b949e; margin-top: 30px; margin-bottom: 10px;">For successfully completing the course</div>
-                <h3 style="font-size: 32px; font-weight: 600; color: #00d47e; margin: 0;">${courseTitle}</h3>
+                <div style="font-size: 16px; color: #8b949e; margin-top: 25px; margin-bottom: 10px;">For successfully completing the course</div>
+                <h3 style="font-size: 30px; font-weight: 600; color: #00d47e; margin: 0;">${courseTitle}</h3>
             </div>
 
             <div style="position: absolute; bottom: 60px; left: 80px; right: 80px; display: flex; justify-content: space-between; align-items: flex-end;">
                 <div style="text-align: center; width: 250px;">
-                    <div style="border-bottom: 1px solid rgba(255, 198, 65, 0.5); margin-bottom: 10px; font-size: 18px; padding-bottom: 5px;">${new Date(issuedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                    <div style="border-bottom: 1px solid rgba(255, 198, 65, 0.5); margin-bottom: 10px; font-size: 18px; padding-bottom: 5px;">${formattedDate}</div>
                     <div style="font-size: 14px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Date Issued</div>
                 </div>
 
-                <div style="width: 120px; height: 120px; border: 4px dashed #ffc641; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'Cinzel', serif; font-size: 14px; color: #ffc641; text-align: center; background: rgba(255, 198, 65, 0.05); transform: rotate(-15deg);">
+                <div style="width: 110px; height: 110px; border: 3px dashed #ffc641; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; color: #ffc641; text-align: center; background: rgba(255, 198, 65, 0.05); transform: rotate(-15deg);">
                     OASIS<br>OFFICIAL<br>VERIFIED
                 </div>
 
                 <div style="text-align: center; width: 250px;">
-                    <div style="border-bottom: 1px solid rgba(255, 198, 65, 0.5); margin-bottom: 10px; font-size: 18px; padding-bottom: 5px; font-family: 'Cinzel', serif; color: #00d47e; font-style: italic;">Oasis Admin</div>
+                    <div style="border-bottom: 1px solid rgba(255, 198, 65, 0.5); margin-bottom: 10px; font-size: 18px; padding-bottom: 5px; color: #00d47e; font-style: italic; font-weight: 600;">Oasis Admin</div>
                     <div style="font-size: 14px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Lead Instructor</div>
                 </div>
             </div>
 
-            <div style="position: absolute; bottom: 20px; width: 100%; left: 0; text-align: center; font-size: 12px; color: #484f58; font-family: monospace;">
-                Credential ID: ${verificationUuid} | Verify at: ${hostUrl}/verify
+            <div style="position: absolute; bottom: 20px; width: 100%; left: 0; text-align: center; font-size: 12px; color: #8b949e; font-family: monospace;">
+                Credential ID: ${verificationUuid} | Verify at: ${hostUrl}/verify/${verificationUuid}
             </div>
         </div>
       `;
-      container.innerHTML += certHtml;
+
       document.body.appendChild(container);
 
-      // Wait a moment for fonts to render
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Brief tick for DOM render
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       const element = document.getElementById("cert-to-print");
-      if (!element) return;
+      if (!element) throw new Error("Certificate container failed to mount.");
 
       const canvas = await html2canvas(element, {
-        scale: 2, // High resolution
+        scale: 2,
         backgroundColor: '#0d1117',
+        useCORS: true,
+        allowTaint: true,
         logging: false,
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       
-      // A4 is 297x210 mm, landscape
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4'
       });
       
-      // Calculate aspect ratio fit for A4
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = canvas.width;
@@ -132,28 +140,42 @@ export function PdfDownloader({
       const imgY = (pdfHeight - imgHeight * ratio) / 2;
 
       pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-      
-      // Include real clickable link in the PDF metadata/annotations
-      pdf.link(imgX, imgY + (imgHeight * ratio) - 15, imgWidth * ratio, 10, { url: `${hostUrl}/verify/${verificationUuid}` });
+      pdf.link(imgX, imgY, imgWidth * ratio, imgHeight * ratio, { url: `${hostUrl}/verify/${verificationUuid}` });
 
-      pdf.save(`Oasis_Certificate_${courseTitle.replace(/\s+/g, '_')}.pdf`);
-      
-      // Cleanup
-      document.body.removeChild(container);
-    } catch (error) {
+      const cleanFileName = (courseTitle || 'Certificate').replace(/[^a-zA-Z0-9]/g, '_');
+      pdf.save(`Oasis_Certificate_${cleanFileName}.pdf`);
+    } catch (error: any) {
       console.error("PDF generation failed:", error);
+      setErrorMsg("Failed to generate PDF. Please try again or refresh.");
     } finally {
+      if (container && document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
       setIsDownloading(false);
     }
   };
 
   return (
-    <button 
-      onClick={handleDownload}
-      disabled={isDownloading}
-      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-oasis-gold/10 text-oasis-gold hover:bg-oasis-gold/20 transition-colors font-medium text-sm disabled:opacity-50"
-    >
-      <Download size={16} /> {isDownloading ? "Generating..." : "Download PDF"}
-    </button>
+    <div className="flex flex-col items-center w-full max-w-xs">
+      <button 
+        onClick={handleDownload}
+        disabled={isDownloading}
+        className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-oasis-gold text-black hover:bg-oasis-gold/90 transition-all font-bold text-sm shadow-[0_0_20px_rgba(255,198,65,0.25)] hover:shadow-[0_0_25px_rgba(255,198,65,0.4)] disabled:opacity-50 cursor-pointer"
+      >
+        {isDownloading ? (
+          <>
+            <Loader2 size={18} className="animate-spin" /> Generating PDF...
+          </>
+        ) : (
+          <>
+            <Download size={18} /> Download PDF
+          </>
+        )}
+      </button>
+      {errorMsg && (
+        <p className="text-xs text-red-400 mt-2 font-medium">{errorMsg}</p>
+      )}
+    </div>
   );
 }
+

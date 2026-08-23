@@ -1,6 +1,9 @@
+import os
 import uuid
 from datetime import datetime
 from typing import List, Optional
+from django.conf import settings
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.cache import cache
 from ninja import Router, Schema
 from ninja.errors import HttpError
@@ -137,6 +140,40 @@ def verify_certificate(request, cert_uuid: str):
         'recipient_avatar_type': avatar_type,
         'recipient_avatar_icon': avatar_icon,
         'course_slug': course_slug,
+    }
+
+
+@router.get('/{cert_uuid}/download')
+def download_certificate(request, cert_uuid: str):
+    """Public download endpoint for certificates."""
+    try:
+        parsed_uuid = uuid.UUID(cert_uuid)
+    except ValueError:
+        raise HttpError(400, 'Invalid certificate ID format')
+
+    cert_obj = Certificate.objects.filter(verification_uuid=parsed_uuid).first()
+    if not cert_obj:
+        raise HttpError(404, 'Certificate not found')
+
+    if cert_obj.pdf_url and cert_obj.pdf_url.startswith('http'):
+        return HttpResponseRedirect(cert_obj.pdf_url)
+
+    if cert_obj.pdf_url and cert_obj.pdf_url.startswith('/media/'):
+        media_path = cert_obj.pdf_url.lstrip('/')
+        full_path = os.path.join(settings.BASE_DIR, media_path)
+        if os.path.exists(full_path):
+            with open(full_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="Oasis_Certificate_{cert_obj.verification_uuid}.pdf"'
+                return response
+
+    return {
+        "status": cert_obj.status,
+        "verification_uuid": cert_obj.verification_uuid,
+        "recipient_name": cert_obj.recipient_name_snapshot,
+        "course_title": cert_obj.title_snapshot,
+        "issued_at": cert_obj.issued_at,
+        "message": "Certificate available for direct verification page download."
     }
 
 

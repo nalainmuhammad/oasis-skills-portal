@@ -99,17 +99,26 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
               const session = await auth();
               if (!session) return;
               const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+              let courseCompleted = false;
+              let verificationUuid: string | null = null;
               if (apiUrl) {
-                await fetch(`${apiUrl}/api/lessons/${currentLesson.id}/complete`, {
+                const res = await fetch(`${apiUrl}/api/lessons/${currentLesson.id}/complete`, {
                   method: 'POST',
                   headers: { 'Authorization': `Bearer ${session.accessToken}` }
                 });
+                if (res.ok) {
+                  const data = await res.json();
+                  courseCompleted = data.course_completed;
+                  verificationUuid = data.verification_uuid;
+                }
                 const { revalidateTag } = await import('next/cache');
                 // @ts-ignore
                 revalidateTag('enrollments');
               }
               const { redirect } = await import('next/navigation');
-              if (nextLesson) {
+              if (courseCompleted && verificationUuid) {
+                redirect(`/verify/${verificationUuid}`);
+              } else if (nextLesson) {
                 redirect(`/learn/${course.slug}/${nextLesson.id}`);
               } else {
                 redirect('/dashboard');

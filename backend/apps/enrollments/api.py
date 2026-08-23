@@ -79,6 +79,7 @@ class CompletionOut(Schema):
     progress_percent: int
     course_completed: bool
     certificate_pending: bool = False
+    verification_uuid: Optional[str] = None
 
 
 class EnrollmentMessage(Schema):
@@ -272,6 +273,8 @@ def complete_lesson(request, lesson_id: int):
     course_completed = new_progress >= 100
     certificate_pending = False
 
+    verification_uuid = None
+
     if course_completed:
         enrollment.status = Enrollment.Status.COMPLETED
         enrollment.completed_at = datetime.now(timezone.utc)
@@ -279,22 +282,38 @@ def complete_lesson(request, lesson_id: int):
 
         # 4. Create certificate row (idempotent via UNIQUE constraint per §4.1)
         from apps.certificates.models import Certificate
+
+        # Generate a unique certificate number
+        cert_num = f"CERT-OASIS-{datetime.now(timezone.utc).year}-{Certificate.objects.count() + 1001}"
+
         cert, created = Certificate.objects.get_or_create(
             user=user,
             course=course,
             defaults={
                 'enrollment': enrollment,
                 'recipient_name_snapshot': user.full_name,
-                'course_title_snapshot': course.title,
+                'title_snapshot': course.title,
+                'cert_type': Certificate.CertType.COURSE,
+                'certificate_number': cert_num,
                 'status': Certificate.Status.GENERATED,
             }
         )
 
+        verification_uuid = str(cert.verification_uuid)
+
         if created:
             certificate_pending = True
-            # 5. Enqueue async certificate generation (§4.2)
-            # from apps.certificates.tasks import generate_certificate_chain
-            # generate_certificate_chain.delay(cert.id)
+            # Notify the user about their new certificate
+            try:
+                from apps.notifications.models import Notification
+                Notification.objects.create(
+                    user=user,
+                    title="Course Certificate Earned!",
+                    message=f"Congratulations {user.full_name}! You have completed '{course.title}' and earned a verified certificate.",
+                    type=Notification.NotificationType.CERTIFICATE_ISSUED
+                )
+            except Exception:
+                pass
 
     # Invalidate caches
     cache.delete(f'enrollments:user:{user.public_id}')
@@ -304,6 +323,7 @@ def complete_lesson(request, lesson_id: int):
         'progress_percent': new_progress,
         'course_completed': course_completed,
         'certificate_pending': certificate_pending,
+        'verification_uuid': verification_uuid,
     }
 
 
